@@ -4,5 +4,11 @@ d3.csv('data/ufo_sightings.csv')
 .then(data => {
     console.log(data)
     sightings = data;
+
+    pieChart = new PieChart({
+        parentElement: '#piechart',
+        parameter: 'ufo_shape'
+    }, sightings);
+    pieChart.UpdateVis();
 })
 .catch(error => console.error(error));
