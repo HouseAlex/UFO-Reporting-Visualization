@@ -4,12 +4,11 @@ class PieChart {
             parentElement: _config.parentElement,
             containerWidth: _config.containerWidth || 1000,
             containerHeight: _config.containerHeight || 500,
-            margin: _config.margin || {top: 25, right: 20, bottom: 30, left: 50},
+            margin: _config.margin || {top: 40, right: 50, bottom: 40, left: 50},
             tooltipPadding: _config.tooltipPadding || 15,
             parameter: _config.parameter
         }
         this.data = _data;
-        this.aggData = this.CalculatePercentages(this.config.parameter, 10);
 
         this.InitVis();
     }
@@ -29,22 +28,24 @@ class PieChart {
             .attr('height', vis.height)
 
         // create chart
-        vis.chart = vis.svg.append("g")
-            .attr("transform", `translate(${this.width / 2},${this.height / 2})`);
+        vis.chart = vis.svg.append('g')
+            .attr('transform', `translate(${vis.width / 2},${vis.height / 2})`);
 
-        // Data calculation for 
+        vis.pie = d3.pie().value(d => d.percent);
 
-        this.pie = d3.pie()
-            .value(d => d.value)
-            .sort(null);
-
-        this.arc = d3.arc()
+        vis.arc = d3.arc()
             .innerRadius(0)
-            .outerRadius(this.radius);
+            .outerRadius(vis.radius);
+
+        //vis.colors = d3.scaleOrdinal()
     }
 
     UpdateVis() {
         let vis = this;
+
+        // Data calculation for the chart
+        vis.aggData = vis.CalculatePercentages(vis.config.parameter, 10);
+        console.log(vis.aggData)
 
         vis.RenderVis();
     }
@@ -52,8 +53,23 @@ class PieChart {
     RenderVis() {
         let vis = this;
 
-        const arcs = vis.svg.selectAll('.arc')
-            .data(vis.pie())
+        console.log(vis.pie(vis.aggData))
+
+        const arcs = vis.chart.selectAll('.arc')
+            .data(vis.pie(vis.aggData))
+            .enter().append('g');
+
+        arcs.append("path")
+            .attr("d", vis.arc)
+            .attr('fill', 'steelblue')
+            //.attr("fill", (d, i) => vis.colors(i));
+
+        // TODO: Text change or details on demand.
+        /*
+        arcs.append("text")
+            .attr("transform", d => `translate(${vis.arc.centroid(d)})`)
+            .attr("dy", "0.35em")
+            .text(d => d.data.type);*/
     }
 
     CalculatePercentages(parameter, threshold) {
@@ -88,7 +104,7 @@ class PieChart {
             const temp = other.count + item.count;
             const tempPerc = (temp / total) * 100;
             const alonePerc = (item.count / total) * 100
-            if (tempPerc <= threshold || alonePerc < 3) {
+            if (tempPerc <= threshold) {
                 other.count = temp;
                 other.percent = tempPerc;
             }
@@ -97,7 +113,7 @@ class PieChart {
                 final.push(item)
             }
         })
-        console.log(final)
+        //console.log(final)
 
         return final;
     }

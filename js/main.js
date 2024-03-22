@@ -9,5 +9,6 @@ d3.csv('data/ufo_sightings.csv')
         parentElement: '#piechart',
         parameter: 'ufo_shape'
     }, sightings);
+    pieChart.UpdateVis();
 })
 .catch(error => console.error(error));
