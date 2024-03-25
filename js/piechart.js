@@ -36,8 +36,6 @@ class PieChart {
         vis.arc = d3.arc()
             .innerRadius(0)
             .outerRadius(vis.radius);
-
-        //vis.colors = d3.scaleOrdinal()
     }
 
     UpdateVis() {
@@ -45,7 +43,20 @@ class PieChart {
 
         // Data calculation for the chart
         vis.aggData = vis.CalculatePercentages(vis.config.parameter, 10);
-        console.log(vis.aggData)
+        console.log(vis.aggData.map(d => d.type))
+
+        vis.colorScale = d3.scaleSequential()
+            .domain([0, vis.aggData.length - 1])
+            .interpolator(d3.interpolateViridis);
+        
+        vis.greyScale = d3.scaleSequential()
+            .domain(vis.colorScale.domain())
+            .interpolator(function(t) {
+                // Convert the color to grayscale using luminance
+                var rgb = d3.color(sequentialColorScale(t)).rgb();
+                var luminance = 0.2126 * rgb.r + 0.7152 * rgb.g + 0.0722 * rgb.b;
+                return d3.rgb(luminance, luminance, luminance);
+            });
 
         vis.RenderVis();
     }
@@ -53,16 +64,26 @@ class PieChart {
     RenderVis() {
         let vis = this;
 
-        console.log(vis.pie(vis.aggData))
-
-        const arcs = vis.chart.selectAll('.arc')
+        vis.arcs = vis.chart.selectAll('.arc')
             .data(vis.pie(vis.aggData))
-            .enter().append('g');
+            .enter().append('g')
+            .attr('class', 'arc');
 
-        arcs.append("path")
+        vis.arcs.append("path")
             .attr("d", vis.arc)
-            .attr('fill', 'steelblue')
-            //.attr("fill", (d, i) => vis.colors(i));
+            //.attr('fill', 'steelblue')
+            .attr('fill', (d,i) => vis.colorScale(i));
+
+        vis.arcs.on('click', (d, i, nodes) => {
+            console.log("d:", d);
+    console.log("i:", i);
+    console.log("nodes:", nodes);
+            var isSelected = d3.select(nodes[i]).classed('selected');
+
+            console.log(isSelected);
+            d3.select(nodes[i]).classed('selected', !isSelected);
+            vis.UpdateArcColors();
+        })
 
         // TODO: Text change or details on demand.
         /*
@@ -70,6 +91,13 @@ class PieChart {
             .attr("transform", d => `translate(${vis.arc.centroid(d)})`)
             .attr("dy", "0.35em")
             .text(d => d.data.type);*/
+    }
+
+    UpdateArcColors() {
+        let vis = this;
+
+        vis.arcs.selectAll("path")
+            .attr('fill', (d, i) => d3.select(this).classed("selected") ? vis.colorScale(i) : vis.greyScale(i));
     }
 
     CalculatePercentages(parameter, threshold) {
@@ -93,14 +121,17 @@ class PieChart {
         counts.sort((a,b) => a.count - b.count);
 
         const final = []
+        const ifOther = counts.find(t => t.type == 'other');
+        //console.log(ifOther)
         final.push({
             type: 'other',
-            count: 0,
-            percent: 0
+            count: ifOther == null ? 0 : ifOther.count,
+            percent: ifOther == null ? 0 : ifOther.count / total
         })
         
         const other = final.find(t => t.type == 'other');
-        counts.forEach(item => {
+        //console.log(other)
+        counts.filter(d => d.type != 'other').forEach(item => {
             const temp = other.count + item.count;
             const tempPerc = (temp / total) * 100;
             const alonePerc = (item.count / total) * 100
@@ -115,6 +146,6 @@ class PieChart {
         })
         //console.log(final)
 
-        return final;
+        return final.sort((a,b) => a.count - b.count);
     }
 }
