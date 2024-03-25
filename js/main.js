@@ -10,6 +10,7 @@ d3.csv('data/ufo_sightings.csv')
         parameter: 'ufo_shape'
     }, sightings);
     pieChart.UpdateVis();
+    
     console.log(d3.schemeCategory10)
 })
 .catch(error => console.error(error));

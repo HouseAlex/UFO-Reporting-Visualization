@@ -48,15 +48,19 @@ class PieChart {
         vis.colorScale = d3.scaleSequential()
             .domain([0, vis.aggData.length - 1])
             .interpolator(d3.interpolateViridis);
+
+        console.log(vis.colorScale.interpolator())
         
         vis.greyScale = d3.scaleSequential()
             .domain(vis.colorScale.domain())
             .interpolator(function(t) {
-                // Convert the color to grayscale using luminance
-                var rgb = d3.color(sequentialColorScale(t)).rgb();
-                var luminance = 0.2126 * rgb.r + 0.7152 * rgb.g + 0.0722 * rgb.b;
-                return d3.rgb(luminance, luminance, luminance);
-            });
+                var color = d3.color(vis.colorScale(t)); // Get the color at the given interpolation value
+                var luminance = 0.299 * color.r + 0.587 * color.g + 0.114 * color.b;
+                //console.log(luminance)
+                return d3.rgb(luminance, luminance, luminance); // Return grayscale color
+        });
+
+        console.log('t')
 
         vis.RenderVis();
     }
@@ -73,31 +77,65 @@ class PieChart {
             .attr("d", vis.arc)
             //.attr('fill', 'steelblue')
             .attr('fill', (d,i) => vis.colorScale(i));
+        
 
-        vis.arcs.on('click', (d, i, nodes) => {
-            console.log("d:", d);
-    console.log("i:", i);
-    console.log("nodes:", nodes);
-            var isSelected = d3.select(nodes[i]).classed('selected');
+        vis.arcs.on('click', function(d) {
+            const isSelected = d3.select(this).classed('selected');
 
-            console.log(isSelected);
-            d3.select(nodes[i]).classed('selected', !isSelected);
+            //console.log(isSelected);
+            d3.select(this).classed('selected', !isSelected);
             vis.UpdateArcColors();
         })
 
         // TODO: Text change or details on demand.
-        /*
-        arcs.append("text")
-            .attr("transform", d => `translate(${vis.arc.centroid(d)})`)
-            .attr("dy", "0.35em")
-            .text(d => d.data.type);*/
+        vis.arcs.on('mouseover', function(d) {
+            console.log(d)
+            var arcData = d3.select(this).datum();
+            //console.log(arcData)
+            d3.select('#tooltip')
+                .style('display', 'block')
+                .style('right', (d.pageX + vis.config.tooltipPadding) + 'px')   
+                .style('top', (d.pageY + vis.config.tooltipPadding) + 'px')
+                .html(`
+                    <div><b>${arcData.data.type}</b></div>
+                    <ul>
+                        <li>Percentage: ${arcData.data.percent}</li>
+                        <li>Count: ${arcData.data.count}</li>
+                    </ul>
+                `);
+        })
+        .on('mouseleave', () => {
+            d3.select('#tooltip').style('display', 'none');
+        });
     }
-
+    
     UpdateArcColors() {
+        let vis = this;
+        //console.log("Inside UpdateArcColors");
+        var oneSelected = false;
+
+        vis.arcs.each(function() {
+            if (d3.select(this).classed('selected')) {
+                oneSelected = true;
+            }
+        });
+        console.log(oneSelected)
+        vis.arcs.selectAll("path")
+            .attr('fill', function(t, i) { 
+                if (oneSelected){
+                    return d3.select(this.parentNode).classed("selected") ? vis.colorScale(vis.aggData.length - t.index - 1) : vis.greyScale(vis.aggData.length -t.index - 1)
+                }
+                else {
+                    //console.log(vis.aggData.length - t.index - 1)
+                    return vis.colorScale(vis.aggData.length - t.index - 1)
+                }
+            })}
+
+    ResetArcColors() {
         let vis = this;
 
         vis.arcs.selectAll("path")
-            .attr('fill', (d, i) => d3.select(this).classed("selected") ? vis.colorScale(i) : vis.greyScale(i));
+            .attr('fill', t => vis.colorScale(vis.aggData.length - t.index - 1));
     }
 
     CalculatePercentages(parameter, threshold) {
