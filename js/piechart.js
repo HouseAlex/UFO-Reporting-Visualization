@@ -88,16 +88,16 @@ class PieChart {
         })
 
         // TODO: Text change or details on demand.
-        vis.arcs.on('mouseover', function(d) {
-            console.log(d)
+        vis.arcs.on('mousemove', function(d) {
+            console.log(d.clientX)
             var arcData = d3.select(this).datum();
             //console.log(arcData)
             d3.select('#tooltip')
                 .style('display', 'block')
-                .style('right', (d.pageX + vis.config.tooltipPadding) + 'px')   
-                .style('top', (d.pageY + vis.config.tooltipPadding) + 'px')
+                .style('left', (d.clientX + vis.config.tooltipPadding) + 'px')   
+                .style('top', (d.clientY + vis.config.tooltipPadding) + 'px')
                 .html(`
-                    <div><b>${arcData.data.type}</b></div>
+                    <div class='tooltip-title'>${arcData.data.type}</div>
                     <ul>
                         <li>Percentage: ${arcData.data.percent}</li>
                         <li>Count: ${arcData.data.count}</li>
