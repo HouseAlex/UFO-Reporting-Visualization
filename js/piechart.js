@@ -134,6 +134,10 @@ class PieChart {
     ResetArcColors() {
         let vis = this;
 
+        vis.arcs.each(function() {
+            d3.select(this).classed('selected', false);
+        })
+
         vis.arcs.selectAll("path")
             .attr('fill', t => vis.colorScale(vis.aggData.length - t.index - 1));
     }

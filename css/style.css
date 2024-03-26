@@ -1,3 +1,25 @@
+    .background {
+    fill: none;
+    pointer-events: all;
+  }
+
+  .button {
+    width:100px;
+    height: 40px;
+  }
+  
+  .container {
+    display: flex;
+  }
+  
+  .margin-right {
+    margin-right: 30px;
+  }
+  
+  .margin-bottom {
+    margin-bottom: 20px;
+  }
+
 /* Tooltip */
 #tooltip {
     position: absolute;
