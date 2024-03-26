@@ -2,7 +2,7 @@ class PieChart {
     constructor(_config, _data) {
         this.config = {
             parentElement: _config.parentElement,
-            containerWidth: _config.containerWidth || 1000,
+            containerWidth: _config.containerWidth || 600,
             containerHeight: _config.containerHeight || 500,
             margin: _config.margin || {top: 40, right: 50, bottom: 40, left: 50},
             tooltipPadding: _config.tooltipPadding || 15,
@@ -89,13 +89,13 @@ class PieChart {
 
         // TODO: Text change or details on demand.
         vis.arcs.on('mousemove', function(d) {
-            console.log(d.clientX)
+            //console.log(d.pageY)
             var arcData = d3.select(this).datum();
             //console.log(arcData)
             d3.select('#tooltip')
                 .style('display', 'block')
-                .style('left', (d.clientX + vis.config.tooltipPadding) + 'px')   
-                .style('top', (d.clientY + vis.config.tooltipPadding) + 'px')
+                .style('left', (d.pageX + vis.config.tooltipPadding) + 'px')   
+                .style('top', (d.pageY + vis.config.tooltipPadding) + 'px')
                 .html(`
                     <div class='tooltip-title'>${arcData.data.type}</div>
                     <ul>
@@ -170,6 +170,10 @@ class PieChart {
             count: ifOther == null ? 0 : ifOther.count,
             percent: ifOther == null ? 0 : ifOther.count / total
         })
+
+        this.typesInOther = []
+        if (ifOther != null)
+            this.typesInOther.push(ifOther.type);
         
         const other = final.find(t => t.type == 'other');
         //console.log(other)
@@ -180,6 +184,7 @@ class PieChart {
             if (tempPerc <= threshold) {
                 other.count = temp;
                 other.percent = tempPerc;
+                this.typesInOther.push(item.type)
             }
             else {
                 item.percent = alonePerc;

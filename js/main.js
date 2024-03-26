@@ -1,4 +1,4 @@
-let sightings
+let sightings, map, pieChart
 
 d3.csv('data/ufo_sightings.csv')
 .then(data => {
@@ -7,11 +7,18 @@ d3.csv('data/ufo_sightings.csv')
 
     const pieChartReset = d3.select('#resetpie');
 
+    map = new LeafletMap({
+        parentElement: 'map'
+    }, sightings);
+    map.UpdateVis();
+
     pieChart = new PieChart({
         parentElement: '#piechart',
         parameter: 'ufo_shape'
     }, sightings);
     pieChart.UpdateVis();
+
+    
     
     pieChartReset.on("click", d => pieChart.ResetArcColors())
 })
