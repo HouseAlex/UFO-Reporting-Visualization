@@ -20,16 +20,20 @@ class LeafletMap {
         vis.esriUrl = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
         vis.esriAttr = 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community';
 
+        vis.streetMapUrl= 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
+        vis.streetMap = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+
+
         //this is the base map layer, where we are showing the map background
-        vis.base_layer = L.tileLayer('https://tile.openstreetmap.de/{z}/{x}/{y}.png', {
+        vis.base_layer = L.tileLayer(vis.streetMapUrl, {
             id: 'esri-image',
-            attribution: vis.esriAttr,
+            attribution: vis.streetMap,
             ext: 'png'
         });
   
         vis.theMap = L.map(vis.config.parentElement, {
-            center: [30, 0],
-            zoom: 2,
+            center: [37.020098201368114, -94.3586387727309],
+            zoom: 4,
             layers: [vis.base_layer]
         });
 
@@ -42,6 +46,15 @@ class LeafletMap {
         vis.theMap.on("zoomend", function(){
             vis.UpdateForZoom();
         });
+
+        vis.yearsMapped = vis.data.map(d => d.year)
+        vis.yearColorScale = d3.scaleLinear()
+            .domain(d3.extent(vis.data, d => d.year))
+            .range(['#020024', '#ddffe7'])
+
+        console.log(vis.yearColorScale.domain())
+
+        vis.colorOption = 'Default';
   
     }
 
@@ -92,7 +105,7 @@ class LeafletMap {
                         .on('mouseleave', function() { //function to add mouseover event
                             d3.select(this).transition() //D3 selects the object we have moused over in order to perform operations on it
                             .duration('150') //how long we are transitioning between the two states (works like keyframes)
-                            .attr("fill", "steelblue") //change the fill
+                            .attr("fill", d => vis.GetCurrentColor(d)) //change the fill
                             .attr('r', 3) //change radius
 
                             d3.select('#tooltip').style('display', 'none');//turn off the tooltip
@@ -109,6 +122,8 @@ class LeafletMap {
         //want to control the size of the radius to be a certain number of meters? 
         vis.radiusSize = 3; 
 
+        console.log(vis.theMap)
+
         // if( vis.theMap.getZoom > 15 ){
         //   metresPerPixel = 40075016.686 * Math.abs(Math.cos(map.getCenter().lat * Math.PI/180)) / Math.pow(2, map.getZoom()+8);
         //   desiredMetersForPoint = 100; //or the uncertainty measure... =) 
@@ -121,5 +136,51 @@ class LeafletMap {
             .attr("cx", d => vis.theMap.latLngToLayerPoint([d.latitude,d.longitude]).x)
             .attr("cy", d => vis.theMap.latLngToLayerPoint([d.latitude,d.longitude]).y)
             .attr("r", vis.radiusSize) ;
+    }
+
+    ChangeColorOption(colorOption) { //TODO FIGURE OUT COLOR SCALES LATER
+        let vis = this;
+        vis.colorOption = colorOption;
+        
+        if (colorOption == 'Default'){
+            vis.Dots.attr('fill', 'steelblue');
+        }
+        else if (colorOption == 'Year') {
+            vis.Dots.attr('fill', d => vis.yearColorScale(d.year))
+        }
+        else if (colorOption == 'Month') {
+            vis.Dots.attr('fill', d => vis.yearColorScale(d.year)) //! TEMPORARY
+        }
+        else if (colorOption == 'Time of Day') {
+            vis.Dots.attr('fill', d => vis.yearColorScale(d.year)) //! TEMPORARY
+        }
+        else if (colorOption == 'UFO Shape') {
+            vis.Dots.attr('fill', d => vis.yearColorScale(d.year)) //! TEMPORARY
+        }
+    }
+
+    ChangeMapOption(mapOption) {
+        let vis = this;
+        vis.mapOption = mapOption;
+    }
+
+    GetCurrentColor(d) {
+        let vis = this;
+
+        if (vis.colorOption == 'Default'){
+            return 'steelblue'
+        }
+        else if (vis.colorOption == 'Year') {
+            return vis.yearColorScale(d.year)
+        }
+        else if (vis.colorOption == 'Month') {
+
+        }
+        else if (vis.colorOption == 'Time of Day') {
+
+        }
+        else if (vis.colorOption == 'UFO Shape') {
+
+        }
     }
 }
