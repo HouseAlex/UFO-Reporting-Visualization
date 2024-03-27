@@ -1,4 +1,9 @@
-    .background {
+#map {
+    width: 60%;
+    height: 600px;
+}
+
+.background {
     fill: none;
     pointer-events: all;
   }
