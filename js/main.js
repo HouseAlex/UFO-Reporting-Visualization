@@ -1,12 +1,11 @@
-let sightings, map, pieChart, colorBySelector, mapSelector
+let map, pieChart, colorBySelector, mapSelector
 
 let colorByOptions = ['Default', 'Year', 'Month', 'Time of Day', 'UFO Shape']
-let mapOptions = ['Gray', 'Topological', '']
+let sightings = []
 
 d3.csv('data/ufo_sightings.csv')
 .then(data => {
     console.log(data)
-    sightings = data;
 
     colorBySelector = d3.select('#colorBySelector')
         .selectAll('option')
@@ -15,25 +14,30 @@ d3.csv('data/ufo_sightings.csv')
         .attr('value', d => d)
         .text(d => d);
 
-        mapSelector = d3.select('#mapSelector')
-        .selectAll('option')
-        .data(mapOptions)
-        .enter().append('option')
-        .attr('value', d => d)
-        .text(d => d);
-
     const pieChartReset = d3.select('#resetpie');
 
     // Break apart date time
-    sightings.forEach(d => {
+    for (let i = 0; i < data.length; i++){
         // Split string
+        let d = data[i];
         let split = d.date_time.split(' ');
         let dateSplit = split[0].split('/');
+        let year = parseInt(dateSplit[2]);
+        if (year < 1980 || year >1999) {
+            continue;
+        }
+
         let timeSplit = split[1].split(':');
+        let hour = parseInt(timeSplit[0]);
+        d.dateOccurred = split[0];
+        d.time = split[1];
         d.month = parseInt(dateSplit[0]);
-        d.year = parseInt(dateSplit[2]);
-        d.timeOfDay = CalculateTimeOfDay(parseInt(timeSplit[0]))
-    });
+        d.year = year;
+        d.timeOfDay = CalculateTimeOfDay(hour);
+        d.hourOfDay = hour;
+
+        sightings.push(d);
+    }
     console.log(sightings)
 
     map = new LeafletMap({
@@ -52,7 +56,7 @@ d3.csv('data/ufo_sightings.csv')
         .on('change', function() {
             map.ChangeColorOption(this.value);
         })
-    
+
     pieChartReset.on("click", d => pieChart.ResetArcColors())
 })
 .catch(error => console.error(error));

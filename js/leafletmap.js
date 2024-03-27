@@ -16,26 +16,56 @@ class LeafletMap {
     InitVis() {
         let vis = this;
 
-        //ESRI
-        vis.esriUrl = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
-        vis.esriAttr = 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community';
-
-        vis.streetMapUrl= 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
-        vis.streetMap = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
-
-
-        //this is the base map layer, where we are showing the map background
-        vis.base_layer = L.tileLayer(vis.streetMapUrl, {
+        //ESRI Base Layer
+        vis.esriLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
             id: 'esri-image',
-            attribution: vis.streetMap,
+            minZoom: 2,
+            maxZoom: 17,
+            attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
             ext: 'png'
         });
-  
-        vis.theMap = L.map(vis.config.parentElement, {
-            center: [37.020098201368114, -94.3586387727309],
-            zoom: 4,
-            layers: [vis.base_layer]
+
+        //StreetMap Base Layer
+        vis.streetMapLayer = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            id: 'osm-image',
+            minZoom: 2,
+            maxZoom: 17,
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+            ext: 'png'
+        })
+
+        //Dark Layer
+        vis.darkLayer = L.tileLayer('https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.{ext}', {
+            id: 'darl-image',
+            maxZoom: 17,
+            attribution: '&copy; <a href="https://www.stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+            ext: 'png'
         });
+
+        // Topo 
+        //! NOT WORKING
+        /*
+        var topoLayer = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+            minZoom: 2,
+            maxZoom: 17,
+            attribution: 'Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)',
+            ext: 'png'
+        });*/
+
+        vis.theMap = L.map(vis.config.parentElement, {
+            center: [34.88593314094864, -93.34241943747668],
+            zoom: 3,
+            layers: [vis.streetMapLayer]
+        });
+
+        vis.baseMaps = {           
+            "Street Map": vis.streetMapLayer,
+            "Dark": vis.darkLayer,
+            //"Topological": vis.topoLayer, 
+            "ESRI": vis.esriLayer,
+        }
+
+        vis.layerControl = L.control.layers(vis.baseMaps).addTo(vis.theMap);
 
         //initialize svg for d3 to add to map
         L.svg({clickable:true}).addTo(vis.theMap)// we have to make the svg layer clickable
@@ -47,15 +77,30 @@ class LeafletMap {
             vis.UpdateForZoom();
         });
 
-        vis.yearsMapped = vis.data.map(d => d.year)
-        vis.yearColorScale = d3.scaleLinear()
+        vis.yearColorScale = d3.scaleSequential()
             .domain(d3.extent(vis.data, d => d.year))
-            .range(['#020024', '#ddffe7'])
+            .interpolator(d3.interpolateGnBu)
 
-        console.log(vis.yearColorScale.domain())
+        vis.monthColorScale = d3.scaleSequential()
+            .domain(d3.extent(vis.data, d => d.month))
+            .interpolator(d3.interpolateYlOrBr);
+
+        vis.timeOfDayColorScale = d3.scaleOrdinal()
+            .domain(vis.data.map(d => d.timeOfDay))
+            .range(d3.schemeSet3.slice(0,5))
+
+        console.log(vis.timeOfDayColorScale.domain())
+        console.log(vis.timeOfDayColorScale.range())        
+
+        vis.ufoShapeColorScale = d3.scaleOrdinal()
+            .domain(vis.data.map(d => d.ufo_shape))
+            
+        vis.ufoShapeColorScale.range(d3.quantize(d3.interpolateRainbow, vis.ufoShapeColorScale.domain().length))
+
+        console.log(vis.ufoShapeColorScale.domain())
+        console.log(vis.ufoShapeColorScale.range()) 
 
         vis.colorOption = 'Default';
-  
     }
 
     UpdateVis() {
@@ -96,7 +141,9 @@ class LeafletMap {
                                   <ul>
                                     <li>UFO Shape: ${d.ufo_shape}</li>
                                     <li>Encounter Length: ${d.encounter_length}</li>
+                                    <li>Time of Day: ${d.time}</li>
                                     <li>Description: ${d.description}</li>
+                                    <li>Date Occured: ${d.dateOccurred}
                                     <li>Date Documented: ${d.date_documented}</li>
                                   </ul>
                                 </div>`);
@@ -138,7 +185,7 @@ class LeafletMap {
             .attr("r", vis.radiusSize) ;
     }
 
-    ChangeColorOption(colorOption) { //TODO FIGURE OUT COLOR SCALES LATER
+    ChangeColorOption(colorOption) { //! Last 2 color scales are acting weird
         let vis = this;
         vis.colorOption = colorOption;
         
@@ -149,13 +196,13 @@ class LeafletMap {
             vis.Dots.attr('fill', d => vis.yearColorScale(d.year))
         }
         else if (colorOption == 'Month') {
-            vis.Dots.attr('fill', d => vis.yearColorScale(d.year)) //! TEMPORARY
+            vis.Dots.attr('fill', d => vis.monthColorScale(d.month))
         }
         else if (colorOption == 'Time of Day') {
-            vis.Dots.attr('fill', d => vis.yearColorScale(d.year)) //! TEMPORARY
+            vis.Dots.attr('fill', d => vis.timeOfDayColorScale(d.year)) //! Something wrong here
         }
         else if (colorOption == 'UFO Shape') {
-            vis.Dots.attr('fill', d => vis.yearColorScale(d.year)) //! TEMPORARY
+            vis.Dots.attr('fill', d => vis.ufoShapeColorScale(d.year)) //! Something wrong here
         }
     }
 
@@ -174,13 +221,13 @@ class LeafletMap {
             return vis.yearColorScale(d.year)
         }
         else if (vis.colorOption == 'Month') {
-
+            return vis.monthColorScale(d.month)
         }
-        else if (vis.colorOption == 'Time of Day') {
-
+        else if (vis.colorOption == 'Time of Day') {    //! This does not work correctly
+            return vis.timeOfDayColorScale(d.timeOfDay)
         }
-        else if (vis.colorOption == 'UFO Shape') {
-
+        else if (vis.colorOption == 'UFO Shape') {      //! This does not work correctly
+            return vis.ufoShapeColorScale(d.ufo_shape)
         }
     }
 }

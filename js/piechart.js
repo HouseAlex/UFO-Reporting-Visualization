@@ -99,7 +99,7 @@ class PieChart {
                 .html(`
                     <div class='tooltip-title'>${arcData.data.type}</div>
                     <ul>
-                        <li>Percentage: ${arcData.data.percent}</li>
+                        <li>Percentage: ${arcData.data.percentFormated}</li>
                         <li>Count: ${arcData.data.count}</li>
                     </ul>
                 `);
@@ -193,6 +193,16 @@ class PieChart {
         })
         //console.log(final)
 
+        final.forEach(d => {
+            d.percentFormated = this.FormatPercent(d.percent);
+        })
+
         return final.sort((a,b) => a.count - b.count);
+    }
+
+    FormatPercent(percent) {
+        let value = percent.toFixed(2);
+        value = +value;
+        return `${value} %`;
     }
 }
