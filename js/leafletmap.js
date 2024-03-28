@@ -89,16 +89,16 @@ class LeafletMap {
             .domain(vis.data.map(d => d.timeOfDay))
             .range(d3.schemeSet3.slice(0,5))
 
-        console.log(vis.timeOfDayColorScale.domain())
-        console.log(vis.timeOfDayColorScale.range())        
+        //console.log(vis.timeOfDayColorScale.domain())
+        //console.log(vis.timeOfDayColorScale.range())        
 
         vis.ufoShapeColorScale = d3.scaleOrdinal()
             .domain(vis.data.map(d => d.ufo_shape))
             
         vis.ufoShapeColorScale.range(d3.quantize(d3.interpolateRainbow, vis.ufoShapeColorScale.domain().length))
 
-        console.log(vis.ufoShapeColorScale.domain())
-        console.log(vis.ufoShapeColorScale.range()) 
+        //console.log(vis.ufoShapeColorScale.domain())
+        //console.log(vis.ufoShapeColorScale.range()) 
 
         vis.colorOption = 'Default';
     }

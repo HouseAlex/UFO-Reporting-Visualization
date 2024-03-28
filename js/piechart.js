@@ -43,13 +43,13 @@ class PieChart {
 
         // Data calculation for the chart
         vis.aggData = vis.CalculatePercentages(vis.config.parameter, 10);
-        console.log(vis.aggData.map(d => d.type))
+        //console.log(vis.aggData.map(d => d.type))
 
         vis.colorScale = d3.scaleSequential()
             .domain([0, vis.aggData.length - 1])
             .interpolator(d3.interpolateViridis);
 
-        console.log(vis.colorScale.interpolator())
+        //console.log(vis.colorScale.interpolator())
         
         vis.greyScale = d3.scaleSequential()
             .domain(vis.colorScale.domain())
@@ -60,7 +60,7 @@ class PieChart {
                 return d3.rgb(luminance, luminance, luminance); // Return grayscale color
         });
 
-        console.log('t')
+        //console.log('t')
 
         vis.RenderVis();
     }
@@ -119,7 +119,7 @@ class PieChart {
                 oneSelected = true;
             }
         });
-        console.log(oneSelected)
+        //console.log(oneSelected)
         vis.arcs.selectAll("path")
             .attr('fill', function(t, i) { 
                 if (oneSelected){

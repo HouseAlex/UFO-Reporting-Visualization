@@ -3,9 +3,11 @@ let map, pieChart, colorBySelector, mapSelector
 let colorByOptions = ['Default', 'Year', 'Month', 'Time of Day', 'UFO Shape']
 let sightings = []
 
+const parseTime = d3.timeParse("%m/%d/%Y");
+
 d3.csv('data/ufo_sightings.csv')
 .then(data => {
-    console.log(data)
+    //console.log(data)
 
     colorBySelector = d3.select('#colorBySelector')
         .selectAll('option')
@@ -29,7 +31,7 @@ d3.csv('data/ufo_sightings.csv')
 
         let timeSplit = split[1].split(':');
         let hour = parseInt(timeSplit[0]);
-        d.dateOccurred = split[0];
+        d.dateOccurred = parseTime(split[0]);
         d.time = split[1];
         d.month = parseInt(dateSplit[0]);
         d.year = year;
@@ -38,6 +40,7 @@ d3.csv('data/ufo_sightings.csv')
 
         sightings.push(d);
     }
+    sightings.sort((a,b) => new Date(a.date_time) - new Date(b.date_time))
     console.log(sightings)
 
     map = new LeafletMap({
@@ -45,6 +48,11 @@ d3.csv('data/ufo_sightings.csv')
     }, sightings);
     map.UpdateVis();
 
+    timeline = new LineGraph({
+        parentElement: '#timeline',
+    }, sightings);
+    timeline.UpdateVis();
+    
     pieChart = new PieChart({
         parentElement: '#piechart',
         parameter: 'ufo_shape'
