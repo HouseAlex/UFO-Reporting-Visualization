@@ -78,24 +78,16 @@ class LeafletMap {
         });
 
         vis.yearColorScale = d3.scaleSequential()
-            .domain(d3.extent(vis.data, d => d.year))
             .interpolator(d3.interpolateGnBu)
 
         vis.monthColorScale = d3.scaleSequential()
-            .domain(d3.extent(vis.data, d => d.month))
             .interpolator(d3.interpolateYlOrBr);
 
         vis.timeOfDayColorScale = d3.scaleOrdinal()
-            .domain(vis.data.map(d => d.timeOfDay))
             .range(d3.schemeSet3.slice(0,5))
 
         //console.log(vis.timeOfDayColorScale.domain())
         //console.log(vis.timeOfDayColorScale.range())        
-
-        vis.ufoShapeColorScale = d3.scaleOrdinal()
-            .domain(vis.data.map(d => d.ufo_shape))
-            
-        vis.ufoShapeColorScale.range(d3.quantize(d3.interpolateRainbow, vis.ufoShapeColorScale.domain().length))
 
         //console.log(vis.ufoShapeColorScale.domain())
         //console.log(vis.ufoShapeColorScale.range()) 
@@ -105,6 +97,16 @@ class LeafletMap {
 
     UpdateVis() {
         let vis = this;
+
+        // Define color scale domains based on data.
+        vis.yearColorScale.domain(d3.extent(vis.data, d => d.year));
+        vis.monthColorScale.domain(d3.extent(vis.data, d => d.month));
+        vis.timeOfDayColorScale.domain(vis.data.map(d => d.timeOfDay));
+
+        vis.ufoShapeColorScale = d3.scaleOrdinal()
+            .domain(vis.data.map(d => d.ufo_shape))
+            
+        vis.ufoShapeColorScale.range(d3.quantize(d3.interpolateRainbow, vis.ufoShapeColorScale.domain().length))
 
         vis.RenderVis();
     }
@@ -143,7 +145,7 @@ class LeafletMap {
                                     <li>Encounter Length: ${d.encounter_length}</li>
                                     <li>Time of Day: ${d.time}</li>
                                     <li>Description: ${d.description}</li>
-                                    <li>Date Occured: ${d.dateOccurred}
+                                    <li>Date Occured: ${d.date_time}
                                     <li>Date Documented: ${d.date_documented}</li>
                                   </ul>
                                 </div>`);

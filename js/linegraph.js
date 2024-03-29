@@ -1,5 +1,5 @@
 class LineGraph {
-    constructor(_config, _data) {
+    constructor(_config, _dispatcher, _data) {
         this.config = {
             parentElement: _config.parentElement,
             containerWidth: _config.containerWidth || 1200,
@@ -9,6 +9,7 @@ class LineGraph {
             parameter: _config.parameter
         }
         this.data = _data;
+        this.dispatcher = dispatcher;
 
         this.InitVis();
     }
@@ -59,7 +60,17 @@ class LineGraph {
     
         // We need to make sure that the tracking area is on top of other chart elements
         vis.marks = vis.chart.append('g')
+        
+        vis.tooltip = vis.chart.append('g')
+            .attr('class', 'timelineTooltip')
+            .style('display', 'none');
+    
+        vis.tooltip.append('circle')
+            .attr('r', 4);
+    
+        vis.tooltip.append('text');
 
+        //!TOOLTIPS ARE NOT TRIGGERED DUE TO BRUSHING, FIX LATER.
         vis.trackingArea = vis.chart.append('rect')
             .attr('width', vis.width)
             .attr('height', vis.height)
@@ -69,14 +80,32 @@ class LineGraph {
             //(event,d) => {
     
         // Empty tooltip group (hidden by default)
-        vis.tooltip = vis.chart.append('g')
-            .attr('class', 'timelineTooltip')
-            .style('display', 'none');
+
+        // Brush
+        // Add brushing
+        vis.brush = d3.brushX()
+            .extent([[0, 0], [vis.width, vis.height]])
+            .on('brush', function({selection}) {
+              if (selection) vis.BrushMoved(selection);
+            })
+            .on('end', function({selection}) {
+              if (!selection) vis.Brushed(null);
+            });
+
+        vis.brushG = vis.chart.append('g')
+            .attr('class', 'brush')
+            .call(vis.brush);
+
+        vis.brushG.append('rect')
+            .attr('width', vis.width)
+            .attr('height', vis.height)
+            .style('pointer-events', 'none');;
     
-        vis.tooltip.append('circle')
-            .attr('r', 4);
-    
-        vis.tooltip.append('text');
+        // Call the brush behavior on the brush area
+        vis.brushG.call(vis.brush);
+        
+
+        vis.brushTimer = null;
     }
 
     UpdateVis() {
@@ -121,6 +150,9 @@ class LineGraph {
                 vis.tooltip.style('display', 'none');
             })
             .on('mousemove', function(event) {
+                const margin = vis.config.margin;
+                const tooltipPadding = vis.config.tooltipPadding;
+
                 // Get date that corresponds to current mouse x-coordinate
                 const xPos = d3.pointer(event, this)[0]; // First array element is x, second is y
                 const date = vis.xScale.invert(xPos);
@@ -131,18 +163,59 @@ class LineGraph {
                 const b = vis.aggData[index];
                 const d = b && (date - a.date > b.date - date) ? b : a; 
 
+                const tooltipWidth = vis.tooltip.node().getBoundingClientRect().width;
+                const tooltipHeight = vis.tooltip.node().getBoundingClientRect().height;
+                let tooltipX = vis.xScale(d.date);
+                let tooltipY = vis.yScale(d.eventCount);
+
+                // Adjust tooltip position if it's going out of the container bounds
+                if (tooltipX + tooltipWidth + tooltipPadding > vis.width) {
+                    tooltipX = vis.width - tooltipWidth - tooltipPadding;
+                }
+
+                if (tooltipY - tooltipHeight - tooltipPadding < 0) {
+                    tooltipY = tooltipHeight + tooltipPadding;
+                }
+
                 // Update tooltip
                 vis.tooltip.select('circle')
                     .attr('transform', `translate(${vis.xScale(d.date)},${vis.yScale(d.eventCount)})`);
                 
                 vis.tooltip.select('text')
-                    .attr('transform', `translate(${vis.xScale(d.date)},${(vis.yScale(d.eventCount) - 15)})`)
-                    .text(Math.round(d.eventCount));
+                    .attr('transform', `translate(${tooltipX},${tooltipY - tooltipPadding})`)
+                    .text(`${vis.GetMonthName(d.date)}, ${d.date.getFullYear()}: ${d.eventCount}`);
             });
 
         // Update the axes
         vis.xAxisG.call(vis.xAxis);
         vis.yAxisG.call(vis.yAxis);
+    }
+
+    BrushMoved(selection) {
+        let vis = this;
+        clearTimeout(vis.brushTimer);
+
+        vis.brushTimer = setTimeout(() => {
+            vis.Brushed(selection);
+        }, 300)
+    }
+
+    Brushed(selection) {
+        let vis = this;
+
+        clearTimeout(vis.brushTimer);
+        if (selection) {
+            //console.log(selection)
+            const [x0, x1] = selection.map(vis.xScale.invert);
+            //console.log(x0)
+            
+            vis.dispatcher.call('filterFromTimeLine', vis.event, [x0, x1]);
+        }
+        if (!selection) {
+            //console.log('end')
+            vis.dispatcher.call('reset', vis.event, vis.config.parentElement)
+        }
+        
     }
 
     CalculateMonthTotals() {
@@ -180,5 +253,9 @@ class LineGraph {
         let totalsArray = Object.keys(totals).map(key => totals[key]);
         totalsArray.sort((a,b) => a.date - b.date)
         return totalsArray;
+    }
+
+    GetMonthName(date) {
+        return date.toLocaleDateString('en-us', {month: 'long'})
     }
 }

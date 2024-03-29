@@ -1,7 +1,9 @@
-let map, pieChart, colorBySelector, mapSelector
+let map, ufoShape, timeline, colorBySelector, mapSelector, sightingsOriginal
 
 let colorByOptions = ['Default', 'Year', 'Month', 'Time of Day', 'UFO Shape']
-let sightings = []
+let sightings = [];
+
+const dispatcher = d3.dispatch('filterFromTimeLine', 'reset');
 
 const parseTime = d3.timeParse("%m/%d/%Y");
 
@@ -31,7 +33,7 @@ d3.csv('data/ufo_sightings.csv')
 
         let timeSplit = split[1].split(':');
         let hour = parseInt(timeSplit[0]);
-        d.dateOccurred = parseTime(split[0]);
+        d.dateOccurred = new Date(d.date_time);
         d.time = split[1];
         d.month = parseInt(dateSplit[0]);
         d.year = year;
@@ -41,6 +43,9 @@ d3.csv('data/ufo_sightings.csv')
         sightings.push(d);
     }
     sightings.sort((a,b) => new Date(a.date_time) - new Date(b.date_time))
+    
+    // Clone Data for filtering purposes.
+    sightingsOriginal = [...sightings];
     console.log(sightings)
 
     map = new LeafletMap({
@@ -50,14 +55,14 @@ d3.csv('data/ufo_sightings.csv')
 
     timeline = new LineGraph({
         parentElement: '#timeline',
-    }, sightings);
+    }, dispatcher, sightings);
     timeline.UpdateVis();
     
-    pieChart = new PieChart({
-        parentElement: '#piechart',
+    ufoShape = new PieChart({
+        parentElement: '#ufoShape',
         parameter: 'ufo_shape'
     }, sightings);
-    pieChart.UpdateVis();
+    ufoShape.UpdateVis();
 
     // Listener for dropdown changes
     d3.select('#colorBySelector')
@@ -65,9 +70,39 @@ d3.csv('data/ufo_sightings.csv')
             map.ChangeColorOption(this.value);
         })
 
-    pieChartReset.on("click", d => pieChart.ResetArcColors())
+    pieChartReset.on("click", d => ufoShape.ResetArcColors())
 })
 .catch(error => console.error(error));
+
+dispatcher.on('filterFromTimeLine', (monthsSelected) => {
+    console.log(monthsSelected);
+    const filteredData = sightings.filter(d => monthsSelected[0] < d.dateOccurred && d.dateOccurred < monthsSelected[1]);
+
+    console.log(filteredData);
+    
+    // Update Leaflet Map
+    map.data = filteredData;
+    map.UpdateVis();
+    
+    // Update UFO Shape Chart
+    ufoShape.data = filteredData;
+    ufoShape.UpdateVis();
+})
+
+dispatcher.on('reset', (elementName) => {
+    console.log(elementName)
+    // Reset Leaflet Map
+    if (elementName != '#map'){
+        map.data = sightingsOriginal;
+        map.UpdateVis(); 
+    }
+
+    // Reset UFO Shape Pie Chart
+    if (elementName != '#ufoShape'){
+        ufoShape.data = sightingsOriginal;
+        ufoShape.UpdateVis();
+    }
+})
 
 function CalculateTimeOfDay(hour) {
     if (hour >= 0 && hour < 6) {

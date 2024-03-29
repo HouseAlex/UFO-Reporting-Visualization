@@ -44,13 +44,13 @@ class PieChart {
         // Data calculation for the chart
         vis.aggData = vis.CalculatePercentages(vis.config.parameter, 10);
         //console.log(vis.aggData.map(d => d.type))
-
+        vis.colorScale = null;
         vis.colorScale = d3.scaleSequential()
             .domain([0, vis.aggData.length - 1])
             .interpolator(d3.interpolateViridis);
 
         //console.log(vis.colorScale.interpolator())
-        
+        vis.greyScale = null;
         vis.greyScale = d3.scaleSequential()
             .domain(vis.colorScale.domain())
             .interpolator(function(t) {
@@ -68,9 +68,11 @@ class PieChart {
     RenderVis() {
         let vis = this;
 
+        vis.chart.selectAll('.arc path').remove();
+
         vis.arcs = vis.chart.selectAll('.arc')
             .data(vis.pie(vis.aggData))
-            .enter().append('g')
+            .join('g')
             .attr('class', 'arc');
 
         vis.arcs.append("path")
@@ -107,6 +109,8 @@ class PieChart {
         .on('mouseleave', () => {
             d3.select('#tooltip').style('display', 'none');
         });
+
+        vis.ResetArcColors();
     }
     
     UpdateArcColors() {
@@ -143,7 +147,7 @@ class PieChart {
     }
 
     CalculatePercentages(parameter, threshold) {
-        const counts = []
+        let counts = []
         this.data.forEach((item, index) => {
             if (item[parameter] != 'NA') {
                 const obj = counts.find(t =>t.type == item[parameter]);
@@ -159,11 +163,12 @@ class PieChart {
             }
         })
 
-        const total = d3.sum(counts.map(d => d.count))
+        let total = d3.sum(counts.map(d => d.count))
+        console.log(counts);
         counts.sort((a,b) => a.count - b.count);
 
-        const final = []
-        const ifOther = counts.find(t => t.type == 'other');
+        let final = []
+        let ifOther = counts.find(t => t.type == 'other');
         //console.log(ifOther)
         final.push({
             type: 'other',
@@ -178,9 +183,9 @@ class PieChart {
         const other = final.find(t => t.type == 'other');
         //console.log(other)
         counts.filter(d => d.type != 'other').forEach(item => {
-            const temp = other.count + item.count;
-            const tempPerc = (temp / total) * 100;
-            const alonePerc = (item.count / total) * 100
+            let temp = other.count + item.count;
+            let tempPerc = (temp / total) * 100;
+            let alonePerc = (item.count / total) * 100
             if (tempPerc <= threshold) {
                 other.count = temp;
                 other.percent = tempPerc;
@@ -191,7 +196,7 @@ class PieChart {
                 final.push(item)
             }
         })
-        //console.log(final)
+        console.log(final)
 
         final.forEach(d => {
             d.percentFormated = this.FormatPercent(d.percent);
