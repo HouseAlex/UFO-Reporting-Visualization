@@ -3,7 +3,7 @@ let map, ufoShape, timeline, colorBySelector, mapSelector, sightingsOriginal
 let colorByOptions = ['Default', 'Year', 'Month', 'Time of Day', 'UFO Shape']
 let sightings = [];
 
-const dispatcher = d3.dispatch('filterFromTimeLine', 'reset');
+const dispatcher = d3.dispatch('filterFromTimeLine', 'filterFromUFOShapePie', 'reset');
 
 const parseTime = d3.timeParse("%m/%d/%Y");
 
@@ -61,7 +61,7 @@ d3.csv('data/ufo_sightings.csv')
     ufoShape = new PieChart({
         parentElement: '#ufoShape',
         parameter: 'ufo_shape'
-    }, sightings);
+    }, dispatcher, sightings);
     ufoShape.UpdateVis();
 
     // Listener for dropdown changes
@@ -76,7 +76,7 @@ d3.csv('data/ufo_sightings.csv')
 
 dispatcher.on('filterFromTimeLine', (monthsSelected) => {
     console.log(monthsSelected);
-    const filteredData = sightings.filter(d => monthsSelected[0] < d.dateOccurred && d.dateOccurred < monthsSelected[1]);
+    const filteredData = timeline.data.filter(d => monthsSelected[0] < d.dateOccurred && d.dateOccurred < monthsSelected[1]);
 
     console.log(filteredData);
     
@@ -89,19 +89,25 @@ dispatcher.on('filterFromTimeLine', (monthsSelected) => {
     ufoShape.UpdateVis();
 })
 
+dispatcher.on('filterFromUFOShapePie', (shapes) => {
+    console.log(shapes);
+    console.log(ufoShape.data)
+    const filteredData = ufoShape.data.filter(d => shapes.includes(d.ufo_shape));
+
+    console.log(filteredData);
+
+    // Update Leaflet Map
+    map.data = filteredData;
+    map.UpdateVis();
+
+    // Update Timeline
+    timeline.data = filteredData;
+    timeline.UpdateVis();
+})
+
 dispatcher.on('reset', (elementName) => {
     console.log(elementName)
-    // Reset Leaflet Map
-    if (elementName != '#map'){
-        map.data = sightingsOriginal;
-        map.UpdateVis(); 
-    }
-
-    // Reset UFO Shape Pie Chart
-    if (elementName != '#ufoShape'){
-        ufoShape.data = sightingsOriginal;
-        ufoShape.UpdateVis();
-    }
+    ResetVisualizations(elementName);
 })
 
 function CalculateTimeOfDay(hour) {
@@ -118,4 +124,24 @@ function CalculateTimeOfDay(hour) {
         return 'Evening';
     }
     else return 'Error';
+}
+
+function ResetVisualizations(elementName) {
+    // Reset Leaflet Map
+    if (elementName != '#map'){
+        map.data = sightingsOriginal;
+        map.UpdateVis(); 
+    }
+
+    // Reset Timeline 
+    if (elementName != '#timeline') {
+        timeline.data = sightingsOriginal;
+        timeline.UpdateVis();
+    }
+
+    // Reset UFO Shape Pie Chart
+    if (elementName != '#ufoShape'){
+        ufoShape.data = sightingsOriginal;
+        ufoShape.UpdateVis();
+    }
 }

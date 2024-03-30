@@ -1,5 +1,5 @@
 class PieChart {
-    constructor(_config, _data) {
+    constructor(_config, _dispatcher, _data) {
         this.config = {
             parentElement: _config.parentElement,
             containerWidth: _config.containerWidth || 600,
@@ -9,6 +9,7 @@ class PieChart {
             parameter: _config.parameter
         }
         this.data = _data;
+        this.dispatcher = _dispatcher;
 
         this.InitVis();
     }
@@ -117,10 +118,12 @@ class PieChart {
         let vis = this;
         //console.log("Inside UpdateArcColors");
         var oneSelected = false;
+        let selectedArcs = []
 
-        vis.arcs.each(function() {
+        vis.arcs.each(function(d) {
             if (d3.select(this).classed('selected')) {
                 oneSelected = true;
+                selectedArcs.push(d.data.type)
             }
         });
         //console.log(oneSelected)
@@ -133,7 +136,21 @@ class PieChart {
                     //console.log(vis.aggData.length - t.index - 1)
                     return vis.colorScale(vis.aggData.length - t.index - 1)
                 }
-            })}
+            });
+
+        if (selectedArcs.includes('other')){
+            selectedArcs = selectedArcs.concat(vis.typesInOther);
+        }
+        console.log(selectedArcs)
+
+        if (selectedArcs.length > 0) {
+            vis.dispatcher.call('filterFromUFOShapePie', vis.event, selectedArcs);
+        }
+        else {
+            vis.dispatcher.call('reset', vis.event, vis.config.parentElement)
+        }
+        
+    }
 
     ResetArcColors() {
         let vis = this;
@@ -144,6 +161,9 @@ class PieChart {
 
         vis.arcs.selectAll("path")
             .attr('fill', t => vis.colorScale(vis.aggData.length - t.index - 1));
+
+        // Reset Filtering on other vis'
+        vis.dispatcher.call('reset', vis.event, vis.config.parentElement)
     }
 
     CalculatePercentages(parameter, threshold) {
@@ -177,8 +197,6 @@ class PieChart {
         })
 
         this.typesInOther = []
-        if (ifOther != null)
-            this.typesInOther.push(ifOther.type);
         
         const other = final.find(t => t.type == 'other');
         //console.log(other)
