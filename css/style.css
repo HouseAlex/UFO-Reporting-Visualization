@@ -1,4 +1,30 @@
-    .background {
+#map {
+    width: 1200px;
+    height: 600px;
+}
+
+/* Axes */
+.axis line {
+  fill: none;
+  stroke: #8693a0;
+  shape-rendering: crispEdges;
+}
+.axis text {
+  font-size: 13px;
+  fill: #6b6b6b;
+}
+.axis-title {
+  font-size: 13px;
+  fill: #888;
+}
+.x-axis .domain {
+  stroke: #8693a0;
+}
+.y-axis .domain {
+  display: none;
+}
+
+.background {
     fill: none;
     pointer-events: all;
   }
@@ -6,6 +32,12 @@
   .button {
     width:100px;
     height: 40px;
+  }
+
+  .chart-line {
+    fill: none;
+    stroke: #517390;
+    stroke-width: 2px;
   }
   
   .container {
@@ -43,4 +75,13 @@
 #tooltip ul {
     margin: 5px 0 0 0;
     padding-left: 20px;
+}
+
+/* Timeline Tooltip */
+.timelineTooltip circle {
+  fill: none;
+  stroke: #78bd39;
+}
+.timelineTooltip text {
+  fill: #78bd39;
 }
