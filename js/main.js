@@ -1,11 +1,15 @@
-let map, pieChart, colorBySelector, mapSelector
+let map, ufoShape, timeline, colorBySelector, mapSelector, sightingsOriginal
 
 let colorByOptions = ['Default', 'Year', 'Month', 'Time of Day', 'UFO Shape']
-let sightings = []
+let sightings = [];
+
+const dispatcher = d3.dispatch('filterFromTimeLine', 'filterFromUFOShapePie', 'reset');
+
+const parseTime = d3.timeParse("%m/%d/%Y");
 
 d3.csv('data/ufo_sightings.csv')
 .then(data => {
-    console.log(data)
+    //console.log(data)
 
     colorBySelector = d3.select('#colorBySelector')
         .selectAll('option')
@@ -29,7 +33,7 @@ d3.csv('data/ufo_sightings.csv')
 
         let timeSplit = split[1].split(':');
         let hour = parseInt(timeSplit[0]);
-        d.dateOccurred = split[0];
+        d.dateOccurred = new Date(d.date_time);
         d.time = split[1];
         d.month = parseInt(dateSplit[0]);
         d.year = year;
@@ -38,6 +42,10 @@ d3.csv('data/ufo_sightings.csv')
 
         sightings.push(d);
     }
+    sightings.sort((a,b) => new Date(a.date_time) - new Date(b.date_time))
+    
+    // Clone Data for filtering purposes.
+    sightingsOriginal = [...sightings];
     console.log(sightings)
 
     map = new LeafletMap({
@@ -45,11 +53,16 @@ d3.csv('data/ufo_sightings.csv')
     }, sightings);
     map.UpdateVis();
 
-    pieChart = new PieChart({
-        parentElement: '#piechart',
+    timeline = new LineGraph({
+        parentElement: '#timeline',
+    }, dispatcher, sightings);
+    timeline.UpdateVis();
+    
+    ufoShape = new PieChart({
+        parentElement: '#ufoShape',
         parameter: 'ufo_shape'
-    }, sightings);
-    pieChart.UpdateVis();
+    }, dispatcher, sightings);
+    ufoShape.UpdateVis();
 
     // Listener for dropdown changes
     d3.select('#colorBySelector')
@@ -57,9 +70,45 @@ d3.csv('data/ufo_sightings.csv')
             map.ChangeColorOption(this.value);
         })
 
-    pieChartReset.on("click", d => pieChart.ResetArcColors())
+    pieChartReset.on("click", d => ufoShape.ResetArcColors())
 })
 .catch(error => console.error(error));
+
+dispatcher.on('filterFromTimeLine', (monthsSelected) => {
+    console.log(monthsSelected);
+    const filteredData = timeline.data.filter(d => monthsSelected[0] < d.dateOccurred && d.dateOccurred < monthsSelected[1]);
+
+    console.log(filteredData);
+    
+    // Update Leaflet Map
+    map.data = filteredData;
+    map.UpdateVis();
+    
+    // Update UFO Shape Chart
+    ufoShape.data = filteredData;
+    ufoShape.UpdateVis();
+})
+
+dispatcher.on('filterFromUFOShapePie', (shapes) => {
+    console.log(shapes);
+    console.log(ufoShape.data)
+    const filteredData = ufoShape.data.filter(d => shapes.includes(d.ufo_shape));
+
+    console.log(filteredData);
+
+    // Update Leaflet Map
+    map.data = filteredData;
+    map.UpdateVis();
+
+    // Update Timeline
+    timeline.data = filteredData;
+    timeline.UpdateVis();
+})
+
+dispatcher.on('reset', (elementName) => {
+    console.log(elementName)
+    ResetVisualizations(elementName);
+})
 
 function CalculateTimeOfDay(hour) {
     if (hour >= 0 && hour < 6) {
@@ -75,4 +124,24 @@ function CalculateTimeOfDay(hour) {
         return 'Evening';
     }
     else return 'Error';
+}
+
+function ResetVisualizations(elementName) {
+    // Reset Leaflet Map
+    if (elementName != '#map'){
+        map.data = sightingsOriginal;
+        map.UpdateVis(); 
+    }
+
+    // Reset Timeline 
+    if (elementName != '#timeline') {
+        timeline.data = sightingsOriginal;
+        timeline.UpdateVis();
+    }
+
+    // Reset UFO Shape Pie Chart
+    if (elementName != '#ufoShape'){
+        ufoShape.data = sightingsOriginal;
+        ufoShape.UpdateVis();
+    }
 }
