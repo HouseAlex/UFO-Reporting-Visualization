@@ -43,7 +43,7 @@ d3.csv('data/ufo_sightings.csv')
         sightings.push(d);
     }
     sightings.sort((a,b) => new Date(a.date_time) - new Date(b.date_time))
-    
+
     // Clone Data for filtering purposes.
     sightingsOriginal = [...sightings];
     console.log(sightings)
@@ -51,13 +51,27 @@ d3.csv('data/ufo_sightings.csv')
     map = new LeafletMap({
         parentElement: 'map'
     }, sightings);
+    pieChart.UpdateVis();
+
+    histogram = new Histogram({
+        parentElement: '#histogram',
+        parameter: 'encounter_length'
+    }, sightings);
+    histogram.UpdateVis();
+
+    histogram2 = new Histogram({
+        parentElement: '#histogram2',
+        parameter: 'encounter_length'
+    }, sightings);
+    histogram2.UpdateVis();
+
     map.UpdateVis();
 
     timeline = new LineGraph({
         parentElement: '#timeline',
     }, dispatcher, sightings);
     timeline.UpdateVis();
-    
+
     ufoShape = new PieChart({
         parentElement: '#ufoShape',
         parameter: 'ufo_shape'
@@ -79,11 +93,11 @@ dispatcher.on('filterFromTimeLine', (monthsSelected) => {
     const filteredData = timeline.data.filter(d => monthsSelected[0] < d.dateOccurred && d.dateOccurred < monthsSelected[1]);
 
     console.log(filteredData);
-    
+
     // Update Leaflet Map
     map.data = filteredData;
     map.UpdateVis();
-    
+
     // Update UFO Shape Chart
     ufoShape.data = filteredData;
     ufoShape.UpdateVis();
@@ -130,10 +144,10 @@ function ResetVisualizations(elementName) {
     // Reset Leaflet Map
     if (elementName != '#map'){
         map.data = sightingsOriginal;
-        map.UpdateVis(); 
+        map.UpdateVis();
     }
 
-    // Reset Timeline 
+    // Reset Timeline
     if (elementName != '#timeline') {
         timeline.data = sightingsOriginal;
         timeline.UpdateVis();
@@ -145,3 +159,5 @@ function ResetVisualizations(elementName) {
         ufoShape.UpdateVis();
     }
 }
+
+
