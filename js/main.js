@@ -134,7 +134,7 @@ function CalculateTimeOfDay(hour) {
     else if (hour >= 12 && hour < 18) {
         return 'Afternoon';
     }
-    else if (hour >= 18 && hour < 24) {
+    else if (hour >= 18 && hour <= 24) {
         return 'Evening';
     }
     else return 'Error';

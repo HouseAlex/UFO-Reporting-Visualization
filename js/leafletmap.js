@@ -77,6 +77,7 @@ class LeafletMap {
             vis.UpdateForZoom();
         });
 
+        // Color Scales
         vis.yearColorScale = d3.scaleSequential()
             .interpolator(d3.interpolateGnBu)
 
@@ -86,13 +87,49 @@ class LeafletMap {
         vis.timeOfDayColorScale = d3.scaleOrdinal()
             .range(d3.schemeSet3.slice(0,5))
 
-        //console.log(vis.timeOfDayColorScale.domain())
-        //console.log(vis.timeOfDayColorScale.range())        
-
-        //console.log(vis.ufoShapeColorScale.domain())
-        //console.log(vis.ufoShapeColorScale.range()) 
-
         vis.colorOption = 'Default';
+
+        // Initialize Color Scale Key
+        vis.blockSize = 20;
+        vis.blockKeySize = 80;
+        vis.keyWidth = 1100;
+
+        vis.legendRectHeight= 12;
+        vis.legendRectWidth= 150;
+
+        // Year color key
+        vis.yearGradientName = '#yearGradient'
+        vis.yearLinearGradient = vis.svg.append('defs').append('linearGradient')
+            .attr('id', vis.yearGradientName);
+
+        vis.yearKeyContainer = d3.select('#mapScaleYear')
+        vis.yearKeySvg = vis.yearKeyContainer.append('svg')
+            .attr('height', vis.blockKeySize + 20)
+            .attr('width', vis.keyWidth)
+            .append('g')
+
+        vis.yearKeyRect = vis.yearKeySvg.append('rect')
+            .attr('width', vis.legendRectWidth)
+            .attr('height', vis.legendRectHeight);
+    
+        vis.yearKeyTitle = vis.yearKeySvg.append('text')
+            .attr('class', 'legend-title')
+            .attr('dy', '.35em')
+            .attr('y', -10)
+            .text("Sighting Year");
+        
+        vis.yearKeyContainer.style('display', 'none');
+
+        // Time color key
+        vis.timeKeyContainer = d3.select("#mapScaleTime")
+        vis.timeKeySvg = vis.timeKeyContainer.append('svg')
+            .attr('width', vis.keyWidth)
+
+        // Ufo shape color key
+        vis.shapeKeyContainer = d3.select("#mapScaleShape")
+        vis.shapeKeySvg = vis.shapeKeyContainer.append('svg')
+            .attr('width', vis.keyWidth);
+        
     }
 
     UpdateVis() {
@@ -104,11 +141,36 @@ class LeafletMap {
         vis.yearColorScale.domain(d3.extent(vis.data, d => d.year));
         vis.monthColorScale.domain(d3.extent(vis.data, d => d.month));
         vis.timeOfDayColorScale.domain(vis.data.map(d => d.timeOfDay));
+        console.log(vis.data.map(d => d.timeOfDay).filter(vis.onlyUnique))
 
         vis.ufoShapeColorScale = d3.scaleOrdinal()
             .domain(vis.data.map(d => d.ufo_shape))
             
         vis.ufoShapeColorScale.range(d3.quantize(d3.interpolateRainbow, vis.ufoShapeColorScale.domain().length))
+        console.log(vis.yearColorScale.range())
+        // Setup Keys
+        // Year Key
+        vis.yearDomain = vis.yearColorScale.domain()
+        vis.yearKeyGradient = [
+            { color: vis.yearColorScale.range()[0], value: vis.yearDomain[0], offset: 0},
+            { color: vis.yearColorScale.range()[1], value: vis.yearDomain[vis.yearDomain.length -1], offset: 100},
+        ];
+
+        // Time Key
+        vis.timeDomain = vis.timeOfDayColorScale.domain()
+        vis.timeKeyRows = Math.ceil((vis.timeDomain.length * vis.blockKeySize + 20) / vis.keyWidth)
+        vis.timeKeySvg
+            .attr("height", vis.blockSize * vis.timeKeyRows + 20)
+            .append("g")
+            .attr("transform", "translate(20, 10)");
+
+        // Shape Key
+        vis.shapeDomain = vis.ufoShapeColorScale.domain()
+        vis.shapeKeyRows = Math.ceil((vis.shapeDomain.length * vis.blockKeySize + 20) / vis.keyWidth)
+        vis.shapeKeySvg
+            .attr("height", vis.blockSize * vis.shapeKeyRows + 20)
+            .append("g")
+            .attr("transform", "translate(20, 10)");
 
         vis.RenderVis();
     }
@@ -162,6 +224,76 @@ class LeafletMap {
                             d3.select('#tooltip').style('display', 'none');//turn off the tooltip
 
                         });
+
+        // Render color Keys
+        // Year Key
+        vis.yearKeySvg.selectAll('.legend-label')
+            .data(vis.yearKeyGradient)
+            .join('text')
+            .attr('class', 'legend-label')
+            .attr('text-anchor', 'middle')
+            .attr('dy', '.35em')
+            .attr('y', 20)
+            .attr('x', (d,index) => {
+            return index == 0 ? 0 : vis.legendRectWidth;
+            })
+            .text(d => d.value);
+            
+        //console.log(vis.legendStops)
+        // Update gradient for legend
+        vis.yearLinearGradient.selectAll('stop')
+            .data(vis.yearKeyGradient)
+            .join('stop')
+            .attr('offset', d => d.offset)
+            .attr('stop-color', d => d.color);
+
+        vis.yearKeyRect.style('fill', `url(${vis.yearGradientName})`);
+
+        // Time Key
+        vis.timeKeySvg.selectAll('.color-block')
+            .data(vis.timeDomain)
+            .enter().append('rect')
+            .attr('class', 'color-block')
+            .attr('x', (d, i) => (i % Math.floor(vis.keyWidth / vis.blockKeySize)) * vis.blockKeySize + 20) // Wrap to the next row if needed
+            .attr('y', (d, i) => Math.floor(i / Math.floor(vis.keyWidth / vis.blockSize)) * vis.blockSize)
+            .attr('width', vis.blockSize)
+            .attr('height', vis.blockSize)
+            .style('fill', d => vis.timeOfDayColorScale(d));
+
+        vis.timeKeySvg.selectAll('.color-label')
+            .data(vis.timeDomain)
+            .enter().append('text')
+            .attr('class', 'color-label')
+            .attr('x', (d, i) => (i % Math.floor(vis.keyWidth / vis.blockKeySize)) * vis.blockKeySize + vis.blockSize / 2 + 20) // Wrap to the next row if needed
+            .attr('y', (d, i) => Math.floor(i / Math.floor(vis.keyWidth / vis.blockSize)) * vis.blockSize + vis.blockSize + 10)
+            .attr('dy', '0.35em')
+            .style('text-anchor', 'middle')
+            .text(d => d);
+        
+        vis.timeKeyContainer.style('display', 'none');
+
+        // Shape Key
+        vis.shapeKeySvg.selectAll('.color-block')
+            .data(vis.shapeDomain)
+            .enter().append('rect')
+            .attr('class', 'color-block')
+            .attr('x', (d, i) => (i % Math.floor(vis.keyWidth / vis.blockKeySize)) * vis.blockKeySize + 20) // Wrap to the next row if needed
+            .attr('y', (d, i) => Math.floor(i / Math.floor(vis.keyWidth / vis.blockKeySize)) * vis.blockSize)
+            .attr('width', vis.blockSize)
+            .attr('height', vis.blockSize)
+            .style('fill', d => vis.ufoShapeColorScale(d));
+
+        vis.shapeKeySvg.selectAll('.color-label')
+            .data(vis.shapeDomain)
+            .enter().append('text')
+            .attr('class', 'color-label')
+            .attr('x', (d, i) => (i % Math.floor(vis.keyWidth / vis.blockKeySize)) * vis.blockKeySize + vis.blockSize / 2 + 20) // Wrap to the next row if needed
+            .attr('y', (d, i) => Math.floor(i / Math.floor(vis.keyWidth / vis.blockKeySize)) * vis.blockSize + vis.blockSize + 10)
+            .attr('dy', '0.35em')
+            .style('text-anchor', 'middle')
+            .text(d => d);
+        
+        vis.shapeKeyContainer.style('display', 'none');
     }
 
     UpdateForZoom() {
@@ -192,27 +324,34 @@ class LeafletMap {
     ChangeColorOption(colorOption) { //! Last 2 color scales are acting weird
         let vis = this;
         vis.colorOption = colorOption;
+        vis.yearKeyContainer.style('display', 'none')
+        vis.timeKeyContainer.style('display', 'none')
+        vis.shapeKeyContainer.style('display', 'none')
         
         if (colorOption == 'Default'){
             vis.Dots.attr('fill', 'steelblue');
         }
         else if (colorOption == 'Year') {
             vis.Dots.attr('fill', d => vis.yearColorScale(d.year))
+            vis.yearKeyContainer.style('display', 'block')
         }
         else if (colorOption == 'Month') {
             vis.Dots.attr('fill', d => vis.monthColorScale(d.month))
         }
         else if (colorOption == 'Time of Day') {
-            vis.Dots.attr('fill', d => vis.timeOfDayColorScale(d.year)) //! Something wrong here
+            vis.Dots.attr('fill', d => vis.timeOfDayColorScale(d.timeOfDay))
+            vis.timeKeyContainer.style('display', 'block')
         }
         else if (colorOption == 'UFO Shape') {
-            vis.Dots.attr('fill', d => vis.ufoShapeColorScale(d.year)) //! Something wrong here
+            vis.Dots.attr('fill', d => vis.ufoShapeColorScale(d.ufo_shape))
+            //vis.shapeKeyContainer.style('display', 'block')
+            //! This key is too big, might cut
         }
     }
 
     GetCurrentColor(d) {
         let vis = this;
-
+        console.log(vis.colorOption)
         if (vis.colorOption == 'Default'){
             return 'steelblue'
         }
@@ -222,11 +361,15 @@ class LeafletMap {
         else if (vis.colorOption == 'Month') {
             return vis.monthColorScale(d.month)
         }
-        else if (vis.colorOption == 'Time of Day') {    //! This does not work correctly
+        else if (vis.colorOption == 'Time of Day') {
             return vis.timeOfDayColorScale(d.timeOfDay)
         }
-        else if (vis.colorOption == 'UFO Shape') {      //! This does not work correctly
+        else if (vis.colorOption == 'UFO Shape') {
             return vis.ufoShapeColorScale(d.ufo_shape)
         }
     }
+
+    onlyUnique(value, index, array) {
+        return array.indexOf(value) === index;
+      }
 }

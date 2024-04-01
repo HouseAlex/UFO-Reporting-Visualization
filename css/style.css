@@ -5,52 +5,65 @@
 
 /* Axes */
 .axis line {
-  fill: none;
-  stroke: #8693a0;
-  shape-rendering: crispEdges;
+    fill: none;
+    stroke: #8693a0;
+    shape-rendering: crispEdges;
 }
+
 .axis text {
-  font-size: 13px;
-  fill: #6b6b6b;
+    font-size: 13px;
+    fill: #6b6b6b;
 }
+
 .axis-title {
-  font-size: 13px;
-  fill: #888;
+    font-size: 13px;
+    fill: #888;
 }
+
 .x-axis .domain {
-  stroke: #8693a0;
+    stroke: #8693a0;
 }
+
 .y-axis .domain {
-  display: none;
+    display: none;
 }
 
 .background {
     fill: none;
     pointer-events: all;
-  }
+}
 
-  .button {
-    width:100px;
+.button {
+    width: 100px;
     height: 40px;
-  }
+}
 
-  .chart-line {
+.chart-line {
     fill: none;
     stroke: #517390;
     stroke-width: 2px;
-  }
-  
-  .container {
+}
+
+.container {
     display: flex;
-  }
-  
-  .margin-right {
+}
+
+.legend-title {
+    font-size: .9rem;
+    font-weight: 600;
+}
+
+.legend-label {
+    font-size: .8rem;
+}
+
+.margin-right {
     margin-right: 30px;
-  }
-  
-  .margin-bottom {
+}
+
+.margin-bottom {
     margin-bottom: 20px;
-  }
+}
 
 /* Tooltip */
 #tooltip {
@@ -79,9 +92,10 @@
 
 /* Timeline Tooltip */
 .timelineTooltip circle {
-  fill: none;
-  stroke: #78bd39;
+    fill: none;
+    stroke: #78bd39;
 }
+
 .timelineTooltip text {
-  fill: #78bd39;
+    fill: #78bd39;
 }
