@@ -20,7 +20,7 @@ class LineGraph {
         vis.width = vis.config.containerWidth - vis.config.margin.left - vis.config.margin.right;
         vis.height = vis.config.containerHeight - vis.config.margin.top - vis.config.margin.bottom;
 
-        console.log(vis.height)
+        //console.log(vis.height)
 
         vis.xScale = d3.scaleTime()
             .range([0, vis.width]);
@@ -71,11 +71,11 @@ class LineGraph {
         vis.tooltip.append('text');
 
         //!TOOLTIPS ARE NOT TRIGGERED DUE TO BRUSHING, FIX LATER.
-        vis.trackingArea = vis.chart.append('rect')
+        /*vis.trackingArea = vis.chart.append('rect')
             .attr('width', vis.width)
             .attr('height', vis.height)
             .attr('fill', 'none')
-            .attr('pointer-events', 'all');
+            .attr('pointer-events', 'all');*/
     
             //(event,d) => {
     
@@ -112,7 +112,7 @@ class LineGraph {
         let vis = this;
 
         vis.aggData = vis.CalculateMonthTotals();
-        console.log(vis.aggData)
+        //console.log(vis.aggData)
 
         vis.xValue = d => d.date;
         vis.yValue = d => d.eventCount;
@@ -121,7 +121,7 @@ class LineGraph {
             .x(d => vis.xScale(vis.xValue(d)))
             .y(d => vis.yScale(vis.yValue(d)));
 
-        console.log(d3.extent(vis.aggData, d => d.date))
+        //console.log(d3.extent(vis.aggData, d => d.date))
 
         // Set the scale input domains
         vis.xScale.domain(d3.extent(vis.aggData, vis.xValue));
@@ -142,6 +142,8 @@ class LineGraph {
             .attr('class', 'chart-line')
             .attr('d', vis.line);
 
+        //! FIND WAY TO INCLUDE Tooltips
+        /*
         vis.trackingArea
             .on('mouseenter', () => {
                 vis.tooltip.style('display', 'block');
@@ -184,7 +186,7 @@ class LineGraph {
                 vis.tooltip.select('text')
                     .attr('transform', `translate(${tooltipX},${tooltipY - tooltipPadding})`)
                     .text(`${vis.GetMonthName(d.date)}, ${d.date.getFullYear()}: ${d.eventCount}`);
-            });
+            });*/
 
         // Update the axes
         vis.xAxisG.call(vis.xAxis);

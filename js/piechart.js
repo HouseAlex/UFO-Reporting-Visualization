@@ -111,7 +111,7 @@ class PieChart {
             d3.select('#tooltip').style('display', 'none');
         });
 
-        vis.ResetArcColors();
+        vis.ResetArcColors(false);
     }
     
     UpdateArcColors() {
@@ -152,7 +152,7 @@ class PieChart {
         
     }
 
-    ResetArcColors() {
+    ResetArcColors(resetFilter) {
         let vis = this;
 
         vis.arcs.each(function() {
@@ -163,7 +163,8 @@ class PieChart {
             .attr('fill', t => vis.colorScale(vis.aggData.length - t.index - 1));
 
         // Reset Filtering on other vis'
-        vis.dispatcher.call('reset', vis.event, vis.config.parentElement)
+        if (resetFilter) 
+            vis.dispatcher.call('reset', vis.event, vis.config.parentElement)
     }
 
     CalculatePercentages(parameter, threshold) {
@@ -184,7 +185,7 @@ class PieChart {
         })
 
         let total = d3.sum(counts.map(d => d.count))
-        console.log(counts);
+        //console.log(counts);
         counts.sort((a,b) => a.count - b.count);
 
         let final = []

@@ -51,7 +51,7 @@ d3.csv('data/ufo_sightings.csv')
     map = new LeafletMap({
         parentElement: 'map'
     }, sightings);
-    pieChart.UpdateVis();
+    map.UpdateVis();
 
     histogram = new Histogram({
         parentElement: '#histogram',
@@ -84,7 +84,7 @@ d3.csv('data/ufo_sightings.csv')
             map.ChangeColorOption(this.value);
         })
 
-    pieChartReset.on("click", d => ufoShape.ResetArcColors())
+    pieChartReset.on("click", d => ufoShape.ResetArcColors(false))
 })
 .catch(error => console.error(error));
 
@@ -141,6 +141,7 @@ function CalculateTimeOfDay(hour) {
 }
 
 function ResetVisualizations(elementName) {
+    console.log('resetting!')
     // Reset Leaflet Map
     if (elementName != '#map'){
         map.data = sightingsOriginal;

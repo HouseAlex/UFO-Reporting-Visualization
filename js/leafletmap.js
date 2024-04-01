@@ -98,6 +98,8 @@ class LeafletMap {
     UpdateVis() {
         let vis = this;
 
+        console.log(vis.data)
+
         // Define color scale domains based on data.
         vis.yearColorScale.domain(d3.extent(vis.data, d => d.year));
         vis.monthColorScale.domain(d3.extent(vis.data, d => d.month));
@@ -206,11 +208,6 @@ class LeafletMap {
         else if (colorOption == 'UFO Shape') {
             vis.Dots.attr('fill', d => vis.ufoShapeColorScale(d.year)) //! Something wrong here
         }
-    }
-
-    ChangeMapOption(mapOption) {
-        let vis = this;
-        vis.mapOption = mapOption;
     }
 
     GetCurrentColor(d) {
