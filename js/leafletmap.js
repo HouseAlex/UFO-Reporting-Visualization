@@ -94,32 +94,41 @@ class LeafletMap {
         vis.blockKeySize = 80;
         vis.keyWidth = 1100;
 
-        vis.legendRectHeight= 12;
-        vis.legendRectWidth= 150;
+        vis.legendRectHeight= 20;
+        vis.legendRectWidth= 200;
 
         // Year color key
-        vis.yearGradientName = '#yearGradient'
-        vis.yearLinearGradient = vis.svg.append('defs').append('linearGradient')
-            .attr('id', vis.yearGradientName);
-
-        vis.yearKeyContainer = d3.select('#mapScaleYear')
+        vis.yearKeyContainer = d3.select("#mapScaleYear");
         vis.yearKeySvg = vis.yearKeyContainer.append('svg')
-            .attr('height', vis.blockKeySize + 20)
+            .attr('height', 60)
             .attr('width', vis.keyWidth)
-            .append('g')
 
-        vis.yearKeyRect = vis.yearKeySvg.append('rect')
-            .attr('width', vis.legendRectWidth)
-            .attr('height', vis.legendRectHeight);
-    
-        vis.yearKeyTitle = vis.yearKeySvg.append('text')
-            .attr('class', 'legend-title')
-            .attr('dy', '.35em')
-            .attr('y', -10)
-            .text("Sighting Year");
-        
-        vis.yearKeyContainer.style('display', 'none');
+        vis.yearKeyG = vis.yearKeySvg.append('g')
 
+        vis.yearGradient = vis.yearKeyG.append("defs")
+            .append("linearGradient")
+            .attr("id", "yearGradient")
+            .attr("x1", "0%")
+            .attr("y1", "0%")
+            .attr("x2", "100%")
+            .attr("y2", "0%");
+
+        // Month color key
+        vis.monthKeyContainer = d3.select("#mapScaleMonth");
+        vis.monthKeySvg = vis.monthKeyContainer.append('svg')
+            .attr('height', 60)
+            .attr('width', vis.keyWidth)
+
+        vis.monthKeyG = vis.monthKeySvg.append('g')
+
+        vis.monthGradient = vis.monthKeyG.append("defs")
+            .append("linearGradient")
+            .attr("id", "monthGradient")
+            .attr("x1", "0%")
+            .attr("y1", "0%")
+            .attr("x2", "100%")
+            .attr("y2", "0%");
+            
         // Time color key
         vis.timeKeyContainer = d3.select("#mapScaleTime")
         vis.timeKeySvg = vis.timeKeyContainer.append('svg')
@@ -150,11 +159,10 @@ class LeafletMap {
         console.log(vis.yearColorScale.range())
         // Setup Keys
         // Year Key
-        vis.yearDomain = vis.yearColorScale.domain()
-        vis.yearKeyGradient = [
-            { color: vis.yearColorScale.range()[0], value: vis.yearDomain[0], offset: 0},
-            { color: vis.yearColorScale.range()[1], value: vis.yearDomain[vis.yearDomain.length -1], offset: 100},
-        ];
+        vis.yearsDomain = vis.yearColorScale.domain();
+
+        // Months Key
+        vis.monthsDomain = vis.monthColorScale.domain();
 
         // Time Key
         vis.timeDomain = vis.timeOfDayColorScale.domain()
@@ -227,28 +235,56 @@ class LeafletMap {
 
         // Render color Keys
         // Year Key
-        //! gradient is not working correctlty.
-        vis.yearKeySvg.selectAll('.legend-label')
-            .data(vis.yearKeyGradient)
-            .join('text')
-            .attr('class', 'legend-label')
-            .attr('text-anchor', 'middle')
-            .attr('dy', '.35em')
-            .attr('y', 20)
-            .attr('x', (d,index) => {
-            return index == 0 ? 0 : vis.legendRectWidth;
-            })
-            .text(d => d.value);
-            
-        //console.log(vis.legendStops)
-        // Update gradient for legend
-        vis.yearLinearGradient.selectAll('stop')
-            .data(vis.yearKeyGradient)
-            .join('stop')
-            .attr('offset', d => d.offset)
-            .attr('stop-color', d => d.color);
+        vis.yearGradientStops = vis.yearGradient.selectAll('stop')
+            .data(vis.yearsDomain)
+            .enter().append('stop')
+            .attr("offset", (d, i) => (i / (vis.yearsDomain.length - 1)) * 100 + "%")
+            .attr("stop-color", d => vis.yearColorScale(d));
 
-        vis.yearKeyRect.style('fill', `url(${vis.yearGradientName})`);
+        vis.yearKeyG.append("rect")
+            .attr("x", 25)
+            .attr("y", 10)
+            .attr("width", vis.legendRectWidth)
+            .attr("height", vis.legendRectHeight)
+            .style("fill", "url(#yearGradient)");
+        
+        vis.yearKeyG.append('text')
+            .attr('x', 10)
+            .attr('y', 45)
+            .text(vis.yearsDomain[0])
+        
+        vis.yearKeyG.append('text')
+            .attr('x', vis.legendRectWidth + 10)
+            .attr('y', 45)
+            .text(vis.yearsDomain[vis.yearsDomain.length - 1])
+
+        vis.yearKeyContainer.style('display', 'none');
+
+        // Month Key
+        vis.monthGradientStops = vis.monthGradient.selectAll('stop')
+            .data(vis.monthsDomain)
+            .enter().append('stop')
+            .attr("offset", (d, i) => (i / (vis.monthsDomain.length - 1)) * 100 + "%")
+            .attr("stop-color", d => vis.monthColorScale(d));
+
+        vis.monthKeyG.append("rect")
+            .attr("x", 25)
+            .attr("y", 10)
+            .attr("width", vis.legendRectWidth)
+            .attr("height", vis.legendRectHeight)
+            .style("fill", "url(#monthGradient)");
+        
+        vis.monthKeyG.append('text')
+            .attr('x', 10)
+            .attr('y', 45)
+            .text(vis.monthsDomain[0])
+        
+        vis.monthKeyG.append('text')
+            .attr('x', vis.legendRectWidth + 10)
+            .attr('y', 45)
+            .text(vis.monthsDomain[vis.monthsDomain.length - 1])
+
+        vis.monthKeyContainer.style('display', 'none');
 
         // Time Key
         vis.timeKeySvg.selectAll('.color-block')
@@ -326,8 +362,9 @@ class LeafletMap {
         let vis = this;
         vis.colorOption = colorOption;
         vis.yearKeyContainer.style('display', 'none')
+        vis.monthKeyContainer.style('display', 'none')
         vis.timeKeyContainer.style('display', 'none')
-        vis.shapeKeyContainer.style('display', 'none')
+        //vis.shapeKeyContainer.style('display', 'none')
         
         if (colorOption == 'Default'){
             vis.Dots.attr('fill', 'steelblue');
@@ -338,6 +375,7 @@ class LeafletMap {
         }
         else if (colorOption == 'Month') {
             vis.Dots.attr('fill', d => vis.monthColorScale(d.month))
+            vis.monthKeyContainer.style('display', 'block')
         }
         else if (colorOption == 'Time of Day') {
             vis.Dots.attr('fill', d => vis.timeOfDayColorScale(d.timeOfDay))
