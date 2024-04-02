@@ -227,6 +227,7 @@ class LeafletMap {
 
         // Render color Keys
         // Year Key
+        //! gradient is not working correctlty.
         vis.yearKeySvg.selectAll('.legend-label')
             .data(vis.yearKeyGradient)
             .join('text')
