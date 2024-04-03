@@ -3,7 +3,7 @@ let map, ufoShape, timeline, colorBySelector, mapSelector, sightingsOriginal
 let colorByOptions = ['Default', 'Year', 'Month', 'Time of Day', 'UFO Shape']
 let sightings = [];
 
-const dispatcher = d3.dispatch('filterFromTimeLine', 'filterFromUFOShapePie', 'reset');
+const dispatcher = d3.dispatch('filterFromTimeLine', 'filterFromUFOShapePie', 'filterFromHistogram', 'reset');
 
 const parseTime = d3.timeParse("%m/%d/%Y");
 
@@ -51,12 +51,11 @@ d3.csv('data/ufo_sightings.csv')
     map = new LeafletMap({
         parentElement: 'map'
     }, sightings);
-    // pieChart.UpdateVis();
 
     histogram = new Histogram({
         parentElement: '#histogram',
         parameter: 'encounter_length'
-    }, sightings);
+    }, dispatcher, sightings);
     histogram.UpdateVis();
 
     histogram2 = new Histogram({
@@ -125,6 +124,23 @@ dispatcher.on('filterFromUFOShapePie', (shapes) => {
     timeline.UpdateVis();
 })
 
+dispatcher.on('filterFromHistogram', (selectedRange) => {
+    // Filter the sightings based on the selected range of encounter lengths
+    const filteredData = sightings.filter(d => {
+        const encounterLength = +d.encounter_length; // Make sure to convert to the correct type if necessary
+        return encounterLength >= selectedRange[0] && encounterLength <= selectedRange[1];
+    });
+
+
+    histogram.data = filteredData;
+    histogram.UpdateVis();
+
+    // Update Leaflet Map with filtered data
+    map.data = filteredData;
+    map.UpdateVis();
+});
+
+
 dispatcher.on('reset', (elementName) => {
     console.log(elementName)
     ResetVisualizations(elementName);
@@ -163,6 +179,15 @@ function ResetVisualizations(elementName) {
     if (elementName != '#ufoShape'){
         ufoShape.data = sightingsOriginal;
         ufoShape.UpdateVis();
+    }
+
+    // Reset UFO Shape Pie Chart
+    if (elementName != '#histogram'){
+        histogram.data = sightingsOriginal;
+        histogram.UpdateVis();
+
+        map.data = sightingsOriginal;
+        map.UpdateVis();
     }
 }
 
