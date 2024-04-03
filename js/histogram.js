@@ -6,7 +6,9 @@ class Histogram {
             containerHeight: _config.containerHeight || 400,
             margin: _config.margin || {top: 50, right: 50, bottom: 50, left: 50},
             tooltipPadding: _config.tooltipPadding || 15,
-            parameter: _config.parameter
+            parameter: _config.parameter,
+            title: _config.title,
+            xTitle: _config.xTitle,
         }
 
         this.data = _data;
@@ -63,12 +65,12 @@ class Histogram {
             .attr('x', vis.width / 2) // Center horizontally
             .attr('dy', '1em')
             .style('text-anchor', 'middle')
-            .text(vis.config.parameter); // Assuming you want to dynamically set this based on the parameter
+            .text(vis.config.xTitle); // Assuming you want to dynamically set this based on the parameter
 
         vis.yTitle = vis.svg.append('text')
             .attr('class', 'axis-title')
             .attr('x', 0)
-            .attr('y', 10)
+            .attr('y', 40)
             .attr('dy', '.71em')
             .text('Count');
 
@@ -79,7 +81,7 @@ class Histogram {
             .attr('y', vis.config.margin.top / 2)
             .attr('text-anchor', 'middle')
             .style('font-size', '20px')
-            .text(vis.config.parameter + ' Histogram');
+            .text(vis.config.title + ' Histogram');
 
 
         vis.brush = d3.brushX()

@@ -55,15 +55,18 @@ d3.csv('data/ufo_sightings.csv')
 
     histogram = new Histogram({
         parentElement: '#histogram',
-        parameter: 'encounter_length'
+        parameter: 'encounter_length',
+        containerWidth: 540,
+        title: 'Encounter Length',
+        xTitle: 'Length (sec)'
     }, dispatcher, sightings);
     histogram.UpdateVis();
 
-    histogram2 = new Histogram({
+    /*histogram2 = new Histogram({
         parentElement: '#histogram2',
         parameter: 'encounter_length'
     }, dispatcher, sightings);
-    histogram2.UpdateVis();
+    histogram2.UpdateVis();*/
 
     barchart = new BarChart({
         parentElement: '#barchart',
