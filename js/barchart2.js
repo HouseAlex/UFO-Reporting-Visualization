@@ -1,10 +1,10 @@
-class BarChart {
+class BarChart2 {
     constructor(_config, _dispatcher, _data) {
         this.config = {
             parentElement: _config.parentElement,
         }
         this.data = _data;
-        this.dispatcher = dispatcher;
+        this.dispatcher = _dispatcher;
         this.InitVis();
     }
 
@@ -15,7 +15,9 @@ class BarChart {
         vis.width = 500 - vis.margin.left - vis.margin.right;
         vis.height = 300 - vis.margin.top - vis.margin.bottom;
 
-        const hours = d3.range(0, 24);
+        const months = d3.range(1, 13);
+
+        // vis.data.sort((a, b) => a.key - b.key);
 
         // append the svg object to the body of the page
         vis.svg = d3.select(vis.config.parentElement)
@@ -26,14 +28,13 @@ class BarChart {
             .attr("transform",
                 "translate(" + vis.margin.left + "," + vis.margin.top + ")");
 
-        vis.data.forEach(function(d) {
-            d.date_time = d3.timeParse("%m/%d/%Y %H:%M")(d.date_time);
-        });
+        // vis.data.forEach(function(d) {
+        //     d.date_time = d3.timeParse("%m/%d/%Y %H:%M")(d.date_time);
+        // });
 
         vis.data = d3.rollup(vis.data,
             v => v.length,
-            d => d.date_time.getHours()
-            // d => d3.timeHour(d.date_time)
+            d => d.date_time.getMonth() + 1
         );
 
         vis.data = Array.from(vis.data, ([key, value]) => ({ key, value }));
@@ -42,12 +43,9 @@ class BarChart {
 
 
         // X axis
-        // vis.x = d3.scaleLinear()
-        //     .range([0, vis.width])
-        //     .nice();
         vis.x = d3.scaleBand()
             .range([0, vis.width])
-            .domain(hours.map(d => d.toString()))
+            .domain(months.map(d => d.toString()))
             .padding(0.2);
         vis.svg.append("g")
             .attr("transform", "translate(0," + vis.height + ")")
@@ -78,42 +76,40 @@ class BarChart {
             .extent([[0, 0], [vis.width, vis.height]])
             .on('brush', function({selection}) {
                 if (selection) vis.BrushMoved(selection);
-              })
-              .on('end', function({selection}) {
+                })
+                .on('end', function({selection}) {
                 if (!selection) vis.Brushed(null);
-              });
+                });
 
         vis.svg.append("g")
             .attr("class", "brush")
             .call(vis.brush);
+
     }
 
     BrushMoved(selection) {
-        // console.log(selection)
         let vis = this;
         const brushedData = [];
         clearTimeout(vis.brushTimer);
 
         vis.brushTimer = setTimeout(() => {
             if (selection) {
-                // console.log("Selection", selection);
+                console.log("Selection", selection);
                 const brushedData = vis.data.filter(d =>
                     vis.x(d.key.toString()) >= selection[0] &&
                     vis.x(d.key.toString()) + vis.x.bandwidth() <= selection[1]
                 );
-                // console.log("Hours", brushedData);
+                // console.log("brushedData", brushedData);
                 vis.Brushed(brushedData);
             } else {
                 vis.Brushed(null);
                 }
-        }, 300)
+        }, 300);
     }
 
     Brushed(selection) {
         let vis = this;
-
-        // console.log("Hours", selection);
-
+        // console.log(selection);
         clearTimeout(vis.brushTimer);
 
         vis.svg.selectAll("rect").classed("selected", function(d) {
@@ -122,7 +118,7 @@ class BarChart {
         });
     
         vis.dispatcher.call(
-            "filterFromBar",
+            "filterFromBar2",
             vis.event,
             selection ? selection.map(d => d.key) : null
         );
@@ -131,6 +127,5 @@ class BarChart {
             // vis.svg.selectAll(".selected").classed("selected", false);
             vis.dispatcher.call("reset", vis.event, vis.config.parentElement);
         }
-        
     }
 }
