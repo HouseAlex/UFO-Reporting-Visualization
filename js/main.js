@@ -59,11 +59,11 @@ d3.csv('data/ufo_sightings.csv')
     }, dispatcher, sightings);
     histogram.UpdateVis();
 
-    histogram2 = new Histogram({
+    /*histogram2 = new Histogram({
         parentElement: '#histogram2',
         parameter: 'encounter_length'
-    }, sightings);
-    histogram2.UpdateVis();
+    }, dispatcher, sightings);
+    histogram2.UpdateVis();*/
 
     barchart = new BarChart({
         parentElement: '#barchart',
@@ -108,14 +108,18 @@ dispatcher.on('filterFromTimeLine', (monthsSelected) => {
     // Update UFO Shape Chart
     ufoShape.data = filteredData;
     ufoShape.UpdateVis();
+
+    // Update histogram
+    histogram.data = filteredData;
+    histogram.UpdateVis();
 })
 
 dispatcher.on('filterFromUFOShapePie', (shapes) => {
-    console.log(shapes);
-    console.log(ufoShape.data)
+    //console.log(shapes);
+    //console.log(ufoShape.data)
     const filteredData = ufoShape.data.filter(d => shapes.includes(d.ufo_shape));
 
-    console.log(filteredData);
+    //console.log(filteredData);
 
     // Update Leaflet Map
     map.data = filteredData;
@@ -124,6 +128,10 @@ dispatcher.on('filterFromUFOShapePie', (shapes) => {
     // Update Timeline
     timeline.data = filteredData;
     timeline.UpdateVis();
+
+    // Update histogram
+    histogram.data = filteredData;
+    histogram.UpdateVis();
 })
 
 dispatcher.on('filterFromHistogram', (selectedRange) => {
@@ -133,6 +141,8 @@ dispatcher.on('filterFromHistogram', (selectedRange) => {
         return encounterLength >= selectedRange[0] && encounterLength <= selectedRange[1];
     });
 
+    ufoShape.data = filteredData;
+    ufoShape.UpdateVis();
 
     histogram.data = filteredData;
     histogram.UpdateVis();

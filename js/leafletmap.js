@@ -188,7 +188,7 @@ class LeafletMap {
         vis.Dots = vis.svg.selectAll('circle')
                     .data(vis.data) 
                     .join('circle')
-                        .attr("fill", "steelblue") 
+                        .attr("fill", d => vis.GetCurrentColor(d)) 
                         .attr("stroke", "black")
                         //Leaflet has to take control of projecting points. Here we are feeding the latitude and longitude coordinates to
                         //leaflet so that it can project them on the coordinates of the view. Notice, we have to reverse lat and lon.
@@ -388,7 +388,7 @@ class LeafletMap {
 
     GetCurrentColor(d) {
         let vis = this;
-        console.log(vis.colorOption)
+        //console.log(vis.colorOption)
         if (vis.colorOption == 'Default'){
             return 'steelblue'
         }
