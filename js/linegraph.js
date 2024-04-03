@@ -4,7 +4,7 @@ class LineGraph {
             parentElement: _config.parentElement,
             containerWidth: _config.containerWidth || 1200,
             containerHeight: _config.containerHeight || 250,
-            margin: _config.margin || {top: 40, right: 25, bottom: 40, left: 50},
+            margin: _config.margin || {top: 10, right: 25, bottom: 40, left: 50},
             tooltipPadding: _config.tooltipPadding || 15,
             parameter: _config.parameter
         }

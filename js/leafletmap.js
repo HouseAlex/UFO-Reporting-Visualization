@@ -4,7 +4,7 @@ class LeafletMap {
             parentElement: _config.parentElement,
             containerWidth: _config.containerWidth || 1000,
             containerHeight: _config.containerHeight || 500,
-            margin: _config.margin || {top: 40, right: 50, bottom: 40, left: 50},
+            margin: _config.margin || {top: 10, right: 50, bottom: 10, left: 50},
             tooltipPadding: _config.tooltipPadding || 15,
             parameter: _config.parameter
         }
@@ -100,7 +100,7 @@ class LeafletMap {
         // Year color key
         vis.yearKeyContainer = d3.select("#mapScaleYear");
         vis.yearKeySvg = vis.yearKeyContainer.append('svg')
-            .attr('height', 60)
+            .attr('height', 50)
             .attr('width', vis.keyWidth)
 
         vis.yearKeyG = vis.yearKeySvg.append('g')
@@ -170,7 +170,6 @@ class LeafletMap {
         vis.timeKeySvg
             .attr("height", vis.blockSize * vis.timeKeyRows + 20)
             .append("g")
-            .attr("transform", "translate(20, 10)");
 
         // Shape Key
         vis.shapeDomain = vis.ufoShapeColorScale.domain()
@@ -178,7 +177,6 @@ class LeafletMap {
         vis.shapeKeySvg
             .attr("height", vis.blockSize * vis.shapeKeyRows + 20)
             .append("g")
-            .attr("transform", "translate(20, 10)");
 
         vis.RenderVis();
     }

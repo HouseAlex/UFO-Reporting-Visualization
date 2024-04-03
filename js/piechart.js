@@ -2,11 +2,12 @@ class PieChart {
     constructor(_config, _dispatcher, _data) {
         this.config = {
             parentElement: _config.parentElement,
-            containerWidth: _config.containerWidth || 600,
-            containerHeight: _config.containerHeight || 500,
+            containerWidth: _config.containerWidth || 300,
+            containerHeight: _config.containerHeight || 350,
             margin: _config.margin || {top: 40, right: 50, bottom: 40, left: 50},
             tooltipPadding: _config.tooltipPadding || 15,
-            parameter: _config.parameter
+            parameter: _config.parameter,
+            title: _config.title,
         }
         this.data = _data;
         this.dispatcher = _dispatcher;
@@ -37,6 +38,15 @@ class PieChart {
         vis.arc = d3.arc()
             .innerRadius(0)
             .outerRadius(vis.radius);
+
+        // Add an overall title to the histogram
+        vis.overallTitle = vis.svg.append('text')
+            .attr('class', 'overall-title')
+            .attr('x', vis.width / 2)
+            .attr('y', vis.config.margin.top / 2)
+            .attr('text-anchor', 'middle')
+            .style('font-size', '20px')
+            .text(vis.config.title);
     }
 
     UpdateVis() {

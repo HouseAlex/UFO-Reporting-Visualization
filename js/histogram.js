@@ -77,7 +77,7 @@ class Histogram {
             .attr('x', vis.config.containerWidth / 2)
             .attr('y', vis.config.margin.top / 2)
             .attr('text-anchor', 'middle')
-            .style('font-size', '20px') // Example styling, adjust as needed
+            .style('font-size', '20px')
             .text(vis.config.parameter + ' Histogram');
 
 

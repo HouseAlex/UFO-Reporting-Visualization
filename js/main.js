@@ -74,7 +74,8 @@ d3.csv('data/ufo_sightings.csv')
 
     ufoShape = new PieChart({
         parentElement: '#ufoShape',
-        parameter: 'ufo_shape'
+        parameter: 'ufo_shape',
+        title: 'UFO Shape'
     }, dispatcher, sightings);
     ufoShape.UpdateVis();
 
@@ -84,7 +85,7 @@ d3.csv('data/ufo_sightings.csv')
             map.ChangeColorOption(this.value);
         })
 
-    pieChartReset.on("click", d => ufoShape.ResetArcColors(false))
+    pieChartReset.on("click", d => ufoShape.ResetArcColors(true))
 })
 .catch(error => console.error(error));
 
