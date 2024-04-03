@@ -72,8 +72,13 @@ d3.csv('data/ufo_sightings.csv')
     barchart2 = new BarChart2({
         parentElement: '#barchart2',
     }, dispatcher, sightings);
-    // barchart.UpdateVis();
 
+    wordcloud = new WordCloud({
+        parentElement: '#wordcloud',
+    }, sightings);
+    wordcloud.UpdateVis();
+
+    
     map.UpdateVis();
 
     timeline = new LineGraph({
