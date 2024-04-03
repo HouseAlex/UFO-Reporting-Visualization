@@ -51,7 +51,7 @@ d3.csv('data/ufo_sightings.csv')
     map = new LeafletMap({
         parentElement: 'map'
     }, sightings);
-    pieChart.UpdateVis();
+    // pieChart.UpdateVis();
 
     histogram = new Histogram({
         parentElement: '#histogram',
@@ -65,6 +65,12 @@ d3.csv('data/ufo_sightings.csv')
     }, sightings);
     histogram2.UpdateVis();
 
+    barchart = new BarChart({
+        parentElement: '#barchart',
+        parameter: 'encounter_length'
+    }, sightings);
+    // barchart.UpdateVis();
+
     map.UpdateVis();
 
     timeline = new LineGraph({
@@ -72,11 +78,11 @@ d3.csv('data/ufo_sightings.csv')
     }, dispatcher, sightings);
     timeline.UpdateVis();
 
-    ufoShape = new PieChart({
-        parentElement: '#ufoShape',
-        parameter: 'ufo_shape'
-    }, dispatcher, sightings);
-    ufoShape.UpdateVis();
+    // ufoShape = new PieChart({
+    //     parentElement: '#ufoShape',
+    //     parameter: 'ufo_shape'
+    // }, dispatcher, sightings);
+    // ufoShape.UpdateVis();
 
     // Listener for dropdown changes
     d3.select('#colorBySelector')
@@ -84,7 +90,7 @@ d3.csv('data/ufo_sightings.csv')
             map.ChangeColorOption(this.value);
         })
 
-    pieChartReset.on("click", d => ufoShape.ResetArcColors())
+    // pieChartReset.on("click", d => ufoShape.ResetArcColors())
 })
 .catch(error => console.error(error));
 
