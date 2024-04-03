@@ -1,9 +1,10 @@
 class BarChart {
-    constructor(_config, _data) {
+    constructor(_config, _dispatcher, _data) {
         this.config = {
             parentElement: _config.parentElement,
         }
         this.data = _data;
+        this.dispatcher = dispatcher;
         this.InitVis();
     }
 
@@ -14,7 +15,7 @@ class BarChart {
         vis.width = 500 - vis.margin.left - vis.margin.right;
         vis.height = 300 - vis.margin.top - vis.margin.bottom;
 
-        // vis.data.sort((a, b) => a.key - b.key);
+        const hours = d3.range(0, 24);
 
         // append the svg object to the body of the page
         vis.svg = d3.select(vis.config.parentElement)
@@ -41,9 +42,12 @@ class BarChart {
 
 
         // X axis
+        // vis.x = d3.scaleLinear()
+        //     .range([0, vis.width])
+        //     .nice();
         vis.x = d3.scaleBand()
             .range([0, vis.width])
-            .domain(vis.data.map(function(d) { return d.key; })) // Use hours as domain
+            .domain(hours.map(d => d.toString()))
             .padding(0.2);
         vis.svg.append("g")
             .attr("transform", "translate(0," + vis.height + ")")
@@ -64,10 +68,69 @@ class BarChart {
             .data(vis.data)
             .enter()
             .append("rect")
-            .attr("x", function(d) { return vis.x(d.key); }) // Position bars based on hour
+            .attr("x", d => vis.x(d.key.toString())) // Position bars based on hour
             .attr("width", vis.x.bandwidth())
-            .attr("y", function(d) { return vis.y(d.value); })
-            .attr("height", function(d) { return vis.height - vis.y(d.value); })
+            .attr("y", d => vis.y(d.value))
+            .attr("height", d => vis.height - vis.y(d.value))
             .attr("fill", "#69b3a2");
+
+        vis.brush = d3.brushX()
+            .extent([[0, 0], [vis.width, vis.height]])
+            .on('brush', function({selection}) {
+                if (selection) vis.BrushMoved(selection);
+              })
+              .on('end', function({selection}) {
+                if (!selection) vis.Brushed(null);
+              });
+
+        vis.svg.append("g")
+            .attr("class", "brush")
+            .call(vis.brush);
+    }
+
+    BrushMoved(selection) {
+        // console.log(selection)
+        let vis = this;
+        const brushedData = [];
+        clearTimeout(vis.brushTimer);
+
+        vis.brushTimer = setTimeout(() => {
+            if (selection) {
+                // console.log("Selection", selection);
+                const brushedData = vis.data.filter(d =>
+                    vis.x(d.key.toString()) >= selection[0] &&
+                    vis.x(d.key.toString()) + vis.x.bandwidth() <= selection[1]
+                );
+                // console.log("Hours", brushedData);
+                vis.Brushed(brushedData);
+            } else {
+                vis.Brushed(null);
+                }
+        }, 300)
+    }
+
+    Brushed(selection) {
+        let vis = this;
+
+        // console.log("Hours", selection);
+
+        clearTimeout(vis.brushTimer);
+
+        vis.svg.selectAll("rect").classed("selected", function(d) {
+            const isSelected = selection && selection.includes(d);
+            return isSelected;
+        });
+    
+        vis.dispatcher.call(
+            "filterFromBar",
+            vis.event,
+            selection ? selection.map(d => d.key) : null
+        );
+    
+        if (!selection) {
+            // vis.svg.selectAll(".selected").classed("selected", false);
+            vis.dispatcher.call("reset", vis.event, vis.config.parentElement);
+        }
+        
     }
 }

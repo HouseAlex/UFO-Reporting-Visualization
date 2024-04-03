@@ -3,7 +3,7 @@ let map, ufoShape, timeline, colorBySelector, mapSelector, sightingsOriginal
 let colorByOptions = ['Default', 'Year', 'Month', 'Time of Day', 'UFO Shape']
 let sightings = [];
 
-const dispatcher = d3.dispatch('filterFromTimeLine', 'filterFromUFOShapePie', 'reset');
+const dispatcher = d3.dispatch('filterFromTimeLine', 'filterFromUFOShapePie', 'filterFromBar', 'filterFromBar2', 'reset');
 
 const parseTime = d3.timeParse("%m/%d/%Y");
 
@@ -46,7 +46,7 @@ d3.csv('data/ufo_sightings.csv')
 
     // Clone Data for filtering purposes.
     sightingsOriginal = [...sightings];
-    console.log(sightings)
+    console.log("sightings", sightings)
 
     map = new LeafletMap({
         parentElement: 'map'
@@ -67,11 +67,11 @@ d3.csv('data/ufo_sightings.csv')
 
     barchart = new BarChart({
         parentElement: '#barchart',
-    }, sightings);
+    }, dispatcher, sightings);
 
     barchart2 = new BarChart2({
         parentElement: '#barchart2',
-    }, sightings);
+    }, dispatcher, sightings);
     // barchart.UpdateVis();
 
     map.UpdateVis();
@@ -128,10 +128,97 @@ dispatcher.on('filterFromUFOShapePie', (shapes) => {
     timeline.UpdateVis();
 })
 
+dispatcher.on('filterFromBar2', (monthsSelected) => {
+    let cleaned_data = []
+    // console.log('Sightings 2', sightings);
+    // Break apart date time
+    // console.log(monthsSelected);
+    const filteredData = filterDataByMonth(sightings, monthsSelected);
+
+    // console.log(filteredData);
+
+    // Update Leaflet Map
+    map.data = filteredData;
+    map.UpdateVis();
+})
+
 dispatcher.on('reset', (elementName) => {
     console.log(elementName)
     ResetVisualizations(elementName);
 })
+
+dispatcher.on('filterFromBar', (hoursSelected) => {
+    let cleaned_data = []
+    // console.log('Sightings 2', sightings);
+    // Break apart date time
+    // console.log(monthsSelected);
+    const filteredData = filterDataByHour(sightings, hoursSelected);
+
+    // console.log(filteredData);
+
+    // Update Leaflet Map
+    map.data = filteredData;
+    map.UpdateVis();
+})
+
+dispatcher.on('reset', (elementName) => {
+    console.log(elementName)
+    ResetVisualizations(elementName);
+})
+
+function filterDataByHour(data, hourNumbers) {
+    // console.log("Hours", hourNumbers);
+    if (!Array.isArray(hourNumbers)) {
+        console.error('Month numbers must be provided as an array.');
+        return [];
+    }
+
+    // console.log("Pre-format", monthNumbers);
+    // Convert month numbers to strings with leading zeros for comparison
+    // const formattedHourNumbers = hourNumbers.map(hour => hour.toString().padStart(2, '0'));
+    // console.log("Month nums", formattedMonthNumbers);
+
+    // Filter data based on the month numbers
+    // console.log(data)
+    const filteredData = data.filter(d => {
+
+        const hour = d.date_time.getHours();
+        // console.log('month', month)
+        // Check if the month matches any of the selected month numbers
+        // console.log(monthNumbers.includes(month));
+        // console.log("month 2", formattedMonthNumbers);
+        return hourNumbers.includes(hour);
+    });
+    // console.log('filteredData', filteredData)
+    return filteredData;
+}
+
+
+function filterDataByMonth(data, monthNumbers) {
+    // console.log(monthNumbers);
+    if (!Array.isArray(monthNumbers)) {
+        console.error('Month numbers must be provided as an array.');
+        return [];
+    }
+
+    // console.log("Pre-format", monthNumbers);
+    // Convert month numbers to strings with leading zeros for comparison
+    // console.log("Month nums", formattedMonthNumbers);
+
+    // Filter data based on the month numbers
+    // console.log(data)
+    const filteredData = data.filter(d => {
+
+        const month = d.date_time.getMonth() + 1;
+        // console.log('month', month)
+        // Check if the month matches any of the selected month numbers
+        // console.log(monthNumbers.includes(month));
+        // console.log("month 2", formattedMonthNumbers);
+        return monthNumbers.includes(month);
+    });
+    // console.log('filteredData', filteredData)
+    return filteredData;
+}
 
 function CalculateTimeOfDay(hour) {
     if (hour >= 0 && hour < 6) {
