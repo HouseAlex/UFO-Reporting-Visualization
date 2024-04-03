@@ -81,7 +81,9 @@ d3.csv('data/ufo_sightings.csv')
     ufoShape = new PieChart({
         parentElement: '#ufoShape',
         parameter: 'ufo_shape',
-        title: 'UFO Shape'
+        title: 'UFO Shape',
+        containerWidth: 400,
+        containerHeight: 450,
     }, dispatcher, sightings);
     ufoShape.UpdateVis();
 

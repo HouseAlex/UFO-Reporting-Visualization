@@ -92,7 +92,7 @@ class LeafletMap {
         // Initialize Color Scale Key
         vis.blockSize = 20;
         vis.blockKeySize = 80;
-        vis.keyWidth = 1100;
+        vis.keyWidth = 1000;
 
         vis.legendRectHeight= 20;
         vis.legendRectWidth= 200;
