@@ -1,5 +1,5 @@
 class Histogram {
-    constructor(_config, _data) {
+    constructor(_config, _dispatcher, _data) {
         this.config = {
             parentElement: _config.parentElement,
             containerWidth: _config.containerWidth || 800,
@@ -10,6 +10,7 @@ class Histogram {
         }
 
         this.data = _data;
+        this.dispatcher = _dispatcher;
 
         this.InitVis();
     }
@@ -77,24 +78,25 @@ class Histogram {
             .attr('x', vis.config.containerWidth / 2)
             .attr('y', vis.config.margin.top / 2)
             .attr('text-anchor', 'middle')
-            .style('font-size', '20px') // Example styling, adjust as needed
+            .style('font-size', '20px')
             .text(vis.config.parameter + ' Histogram');
 
 
         vis.brush = d3.brushX()
-            .extent([[0, 0], [vis.config.containerWidth, vis.height]])
-            .on('brush', function ({selection}) {
-                if (selection) vis.BrushMoved(selection);
+            .extent([[0, 0], [vis.width, vis.height]])
+            .on("start", () => vis.BrushStart()) // Add this line
+            .on("brush", function(event) {
+                vis.BrushMoved(event.selection);
             })
-            .on('end', function ({selection}) {
-                if (!selection) vis.Brushed(null);
+            .on("end", function(event) {
+                vis.Brushed(event.selection);
             });
 
         vis.brushG = vis.svg.append('g')
             .attr('class', 'brush x-brush')
-            .style('opacity', .5)
-            .style('pointer-events', 'all')
+            .attr('transform', `translate(${vis.config.margin.left}, ${vis.config.margin.top})`)
             .call(vis.brush);
+
 
         vis.mouseMoveTimer = null;
         vis.brushTimer = null;
@@ -106,7 +108,7 @@ class Histogram {
         let mappedData = vis.data.map(d => +d[vis.config.parameter]);
         //console.log(mappedData);
         // cutoff is being used here in order to stop the outliers that are too large from ruining the histogram
-        let cutoff = 10000; // Define a reasonable cutoff
+        let cutoff = 8000; // Define a reasonable cutoff
         mappedData = mappedData.map(d => (d > cutoff ? cutoff : d));
         console.log(mappedData);
 
@@ -157,6 +159,14 @@ class Histogram {
         vis.yAxisGroup.call(vis.yAxis);
     }
 
+    BrushStart() {
+        let vis = this;
+
+        // Clear the current selection, effectively resetting the brush
+        // Note: This does not remove the visual brush; it's prepared for a new selection
+        vis.brushG.call(vis.brush.move, null);
+        }
+
     BrushMoved(selection) {
         let vis = this;
         clearTimeout(vis.brushTimer);
@@ -171,18 +181,16 @@ class Histogram {
 
         clearTimeout(vis.brushTimer);
         if (selection) {
-            const selectedx0 = vis.xScale.invert(selection[0] - 50);
-            const selectedx1 = vis.xScale.invert(selection[1] - 50);
 
-            const geos = vis.data.objects.counties.geometries.filter(d => d.properties[vis.column] >= selectedx0 && d.properties[vis.column] <= selectedx1)
-            const countyIds = geos.map(d => d.id)
-            vis.dispatcher.call('filterVisualizations', vis.event, countyIds, vis.config.parentElement)
+            const selectedRange = [
+                vis.xScale.invert(selection[0]),
+                vis.xScale.invert(selection[1])
+            ];
 
+            vis.dispatcher.call('filterFromHistogram', null, selectedRange);
+        } else {
+
+            vis.dispatcher.call('reset', null);
         }
-        if (!selection) {
-            //console.log('end')
-            vis.dispatcher.call('reset', vis.event)
-        }
-
     }
 }
