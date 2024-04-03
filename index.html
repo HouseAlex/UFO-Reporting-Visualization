@@ -10,26 +10,32 @@
 
 <body>
     <div class="screen">
-        <div class="map-container">
-            <div class="container">
-                <div class="container-grid">
-                    <label style="margin-bottom:0%;">Color Selector</label>
-                    <select id="colorBySelector" style="margin-top: 0px; margin-right: 10px; height: 25px;"></select>
-                </div>
-                <div id="mapScaleYear" class="key"></div>
-                <div id="mapScaleMonth" class="key"></div>
-                <div id="mapScaleTime" class="key"></div>
-                <div id="mapScaleShape" class="key"></div>
+        <div class="container">
+            <div class="container-grid">
+                <label style="margin-bottom:0%;">Color Selector</label>
+                <select id="colorBySelector" style="margin-top: 0px; margin-right: 10px; height: 25px;"></select>
             </div>
-            <div id="map"></div>
-            <div id="timeline"></div>
+            <div id="mapScaleYear" class="key"></div>
+            <div id="mapScaleMonth" class="key"></div>
+            <div id="mapScaleTime" class="key"></div>
+            <div id="mapScaleShape" class="key"></div>
         </div>
-        <div class="side-container">
-            <div class="pie-container">
-                <div id="ufoShape"></div>
-                <button id="resetpie" class="button">Reset Selection</button>
+        <div class="screen-upper">
+            <div class="map-container">
+                <div id="map"></div>
+                <div id="timeline"></div>
             </div>
-            <div id="barchart"></div>
+            <div class="side-container">
+                <div class="pie-container">
+                    <div id="ufoShape"></div>
+                    <button id="resetpie" class="button">Reset Selection</button>
+                </div>
+                <div id="barchart"></div>
+            </div>
+        </div>
+        <div class="screen-lower">
+            <div id="histogram"></div>
+            <div id="histogram2"></div>
         </div>
     </div>
     <!--

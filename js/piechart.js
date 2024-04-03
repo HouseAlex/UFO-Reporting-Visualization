@@ -47,6 +47,13 @@ class PieChart {
             .attr('text-anchor', 'middle')
             .style('font-size', '20px')
             .text(vis.config.title);
+
+        vis.footNote = vis.svg.append('text')
+            .attr('x', vis.width / 2)
+            .attr('y', vis.height - (vis.config.margin.bottom /4))
+            .attr('text-anchor', 'middle')
+            .style('font-size', '12px')
+            .text('select/deselect pie chart slices to filter by shape');
     }
 
     UpdateVis() {

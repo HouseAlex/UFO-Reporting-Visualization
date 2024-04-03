@@ -53,7 +53,7 @@ class LeafletMap {
         });*/
 
         vis.theMap = L.map(vis.config.parentElement, {
-            center: [34.88593314094864, -93.34241943747668],
+            center: [39.76725920290348, -65.74218213558198],
             zoom: 3,
             layers: [vis.streetMapLayer]
         });

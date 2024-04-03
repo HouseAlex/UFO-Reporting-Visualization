@@ -59,11 +59,11 @@ d3.csv('data/ufo_sightings.csv')
     }, dispatcher, sightings);
     histogram.UpdateVis();
 
-    /*histogram2 = new Histogram({
+    histogram2 = new Histogram({
         parentElement: '#histogram2',
         parameter: 'encounter_length'
     }, dispatcher, sightings);
-    histogram2.UpdateVis();*/
+    histogram2.UpdateVis();
 
     barchart = new BarChart({
         parentElement: '#barchart',
