@@ -362,7 +362,7 @@ class LeafletMap {
             .attr("r", vis.radiusSize) ;
     }
 
-    ChangeColorOption(colorOption) { //! Last 2 color scales are acting weird
+    ChangeColorOption(colorOption) {
         let vis = this;
         vis.colorOption = colorOption;
         vis.yearKeyContainer.style('display', 'none')
@@ -391,7 +391,6 @@ class LeafletMap {
                 return vis.ufoShapeColorScale(shape);
             })
             vis.shapeKeyContainer.style('display', 'block')
-            //! This key is too big, might cut
         }
     }
 
