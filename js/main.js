@@ -82,6 +82,7 @@ d3.csv('data/ufo_sightings.csv')
     timeline = new LineGraph({
         parentElement: '#timeline',
         title: 'Sighting Reports Over Time',
+        containerWidth: 1150,
         containerHeight: 250,
     }, dispatcher, sightings);
     timeline.UpdateVis();
