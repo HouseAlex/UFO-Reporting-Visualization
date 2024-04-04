@@ -10,75 +10,34 @@
 
 <body>
     <div class="screen">
-        <div class="map-container">
-            <div class="container">
-                <div class="container-grid">
-                    <label style="margin-bottom:0%;">Color Selector</label>
-                    <select id="colorBySelector" style="margin-top: 0px; margin-right: 10px; height: 25px;"></select>
-                </div>
-                
-                <div id="mapScaleYear" class="key"></div>
-                <div id="mapScaleMonth" class="key"></div>
-                <div id="mapScaleTime" class="key"></div>
-                <div id="mapScaleShape" class="key"></div>
-            </div>
-            <div id="map"></div>
-            <div id="timeline"></div>
-        </div>
-        <div class="side-container">
-            <div class="container">
-                <div id="ufoShape"></div>
-                <button id="resetpie" class="button">Reset Selection</button>
-            </div>
-            <div id="histogram"></div>
-            
-            <div id="histogram2"></div>
-        </div>
-    </div>
-    <!--
-        <div class="container" style="width: 1200;">
-        <select id="colorBySelector" style="margin-bottom: 20px; margin-right: 10px; height: 25px;"></select>
-        <div id="mapScaleYear"></div>
-        <div id="mapScaleMonth"></div>
-        <div id="mapScaleTime"></div>
-        <div id="mapScaleShape"></div>
-    </div>
-    <div class="container">
-        <div id="map"></div>
-
         <div class="container">
-            <div id="ufoShape"></div>
-            <button id="resetpie" class="button">Reset Selection</button>
+            <div class="container-grid">
+                <label style="margin-bottom:0%;">Color Selector</label>
+                <select id="colorBySelector" style="margin-top: 0px; margin-right: 10px; height: 25px;"></select>
+            </div>
+            <div id="mapScaleYear" class="key"></div>
+            <div id="mapScaleMonth" class="key"></div>
+            <div id="mapScaleTime" class="key"></div>
+            <div id="mapScaleShape" class="key"></div>
         </div>
-
-    </div>
-    <div class="container">
-        <div id="timeline"></div>
-    </div>
-    <div class="container">
-
-    </div>
-
-    <div class="container">
-        <div id="histogram"></div>
-    </div>
-
-    <div class="container">
-        <div id="histogram2"></div>
-    </div>
-    -->
-    
-
-    <div class="container">
-        <div id="barchart"></div>
-    </div>
-
-    <div class="container">
-        <div id="barchart2"></div>
-    </div>
-
-    <div class="container">
-        <div id="wordcloud"></div>
+        <div class="screen-upper">
+            <div class="map-container">
+                <div id="map"></div>
+                <div id="timeline"></div>
+            </div>
+            <div class="side-container">
+                <div class="pie-container">
+                    <div id="ufoShape"></div>
+                    <button id="resetpie" class="button">Reset Selection</button>
+                </div>
+                <div id="histogram"></div>
+            </div>
+        </div>
+        <div class="screen-lower">
+            <div id="barchart"></div>
+            <div id="barchart2"></div>
+            <div id="wordcloud"></div>
+        </div>
     </div>
 
 

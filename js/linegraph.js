@@ -2,11 +2,12 @@ class LineGraph {
     constructor(_config, _dispatcher, _data) {
         this.config = {
             parentElement: _config.parentElement,
-            containerWidth: _config.containerWidth || 1200,
+            containerWidth: _config.containerWidth || 1150,
             containerHeight: _config.containerHeight || 250,
-            margin: _config.margin || {top: 10, right: 25, bottom: 40, left: 50},
+            margin: _config.margin || {top: 45, right: 25, bottom: 40, left: 50},
             tooltipPadding: _config.tooltipPadding || 15,
-            parameter: _config.parameter
+            parameter: _config.parameter,
+            title: _config.title,
         }
         this.data = _data;
         this.dispatcher = dispatcher;
@@ -69,6 +70,22 @@ class LineGraph {
             .attr('r', 4);
     
         vis.tooltip.append('text');
+
+        vis.yTitle = vis.svg.append('text')
+            .attr('class', 'axis-title')
+            .attr('x', 0)
+            .attr('y', 20)
+            .attr('dy', '.71em')
+            .text('Count');
+
+        // Add an overall title to the histogram
+        vis.overallTitle = vis.svg.append('text')
+            .attr('class', 'overall-title')
+            .attr('x', vis.width / 2)
+            .attr('y', vis.config.margin.top / 2)
+            .attr('text-anchor', 'middle')
+            .style('font-size', '20px')
+            .text(vis.config.title);
 
         //!TOOLTIPS ARE NOT TRIGGERED DUE TO BRUSHING, FIX LATER.
         /*vis.trackingArea = vis.chart.append('rect')

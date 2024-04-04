@@ -1,6 +1,7 @@
 #map {
-    width: 1200px;
-    height: 600px;
+    width: 1150px;
+    height: 500px;
+    margin-top: 15px;
 }
 
 /* Axes */
@@ -45,7 +46,7 @@
 }
 
 .key {
-    margin-top: 15px;
+    margin-top: 0px;
     margin-bottom: 0px;
 }
 
@@ -59,13 +60,20 @@
     row-gap: 0px;
 }
 
-.screen {
-    width: 100%;
-    height: 100%;
-    gap: 20px;;
+.screen-upper {
+    gap: 20px;
     display: grid;
     grid-template-columns: 4fr 2fr;
     row-gap: 0px;
+}
+
+.screen-lower {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+}
+
+.screen {
+    display: grid;
 }
 
 .map-container {
@@ -74,6 +82,13 @@
 
 .side-container {
     display: grid;
+    row-gap: 0px;
+}
+
+.pie-container {
+    margin: auto;
+    margin-top: 0px;
+    display: flex;
 }
 
 .legend-title {

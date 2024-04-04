@@ -2,9 +2,9 @@ class LeafletMap {
     constructor(_config, _data) {
         this.config = {
             parentElement: _config.parentElement,
-            containerWidth: _config.containerWidth || 1000,
+            containerWidth: _config.containerWidth || 1200,
             containerHeight: _config.containerHeight || 500,
-            margin: _config.margin || {top: 10, right: 50, bottom: 10, left: 50},
+            margin: _config.margin || {top: 30, right: 50, bottom: 20, left: 50},
             tooltipPadding: _config.tooltipPadding || 15,
             parameter: _config.parameter
         }
@@ -53,7 +53,7 @@ class LeafletMap {
         });*/
 
         vis.theMap = L.map(vis.config.parentElement, {
-            center: [34.88593314094864, -93.34241943747668],
+            center: [39.76725920290348, -65.74218213558198],
             zoom: 3,
             layers: [vis.streetMapLayer]
         });
@@ -92,7 +92,7 @@ class LeafletMap {
         // Initialize Color Scale Key
         vis.blockSize = 20;
         vis.blockKeySize = 80;
-        vis.keyWidth = 1100;
+        vis.keyWidth = 1000;
 
         vis.legendRectHeight= 20;
         vis.legendRectWidth= 200;
@@ -113,10 +113,24 @@ class LeafletMap {
             .attr("x2", "100%")
             .attr("y2", "0%");
 
+        vis.yearRect = vis.yearKeyG.append("rect")
+            .attr("x", 25)
+            .attr("y", 10)
+            .attr("width", vis.legendRectWidth)
+            .attr("height", vis.legendRectHeight);
+        
+        vis.yearRectMin = vis.yearKeyG.append('text')
+            .attr('x', 10)
+            .attr('y', 45)
+        
+        vis.yearRectMax = vis.yearKeyG.append('text')
+            .attr('x', vis.legendRectWidth + 10)
+            .attr('y', 45)
+
         // Month color key
         vis.monthKeyContainer = d3.select("#mapScaleMonth");
         vis.monthKeySvg = vis.monthKeyContainer.append('svg')
-            .attr('height', 60)
+            .attr('height', 50)
             .attr('width', vis.keyWidth)
 
         vis.monthKeyG = vis.monthKeySvg.append('g')
@@ -128,6 +142,20 @@ class LeafletMap {
             .attr("y1", "0%")
             .attr("x2", "100%")
             .attr("y2", "0%");
+
+        vis.monthRect = vis.monthKeyG.append("rect")
+            .attr("x", 25)
+            .attr("y", 10)
+            .attr("width", vis.legendRectWidth)
+            .attr("height", vis.legendRectHeight)
+
+        vis.monthRectMin = vis.monthKeyG.append('text')
+            .attr('x', 10)
+            .attr('y', 45)
+        
+        vis.monethRectMax = vis.monthKeyG.append('text')
+            .attr('x', vis.legendRectWidth + 10)
+            .attr('y', 45)
             
         // Time color key
         vis.timeKeyContainer = d3.select("#mapScaleTime")
@@ -138,25 +166,33 @@ class LeafletMap {
         vis.shapeKeyContainer = d3.select("#mapScaleShape")
         vis.shapeKeySvg = vis.shapeKeyContainer.append('svg')
             .attr('width', vis.keyWidth);
+
+        vis.yearKeyContainer.style('display', 'none');
+        vis.monthKeyContainer.style('display', 'none');
+        vis.timeKeyContainer.style('display', 'none');
+        vis.shapeKeyContainer.style('display', 'none');
         
     }
 
     UpdateVis() {
         let vis = this;
 
-        console.log(vis.data)
+        //console.log(vis.data)
 
         // Define color scale domains based on data.
         vis.yearColorScale.domain(d3.extent(vis.data, d => d.year));
         vis.monthColorScale.domain(d3.extent(vis.data, d => d.month));
         vis.timeOfDayColorScale.domain(vis.data.map(d => d.timeOfDay));
-        console.log(vis.data.map(d => d.timeOfDay).filter(vis.onlyUnique))
+        //console.log(vis.data.map(d => d.timeOfDay).filter(vis.onlyUnique))
+
+        vis.categoriesCombined = vis.CalculatePercentages('ufo_shape', 30)
+        //console.log(vis.categoriesCombined)
 
         vis.ufoShapeColorScale = d3.scaleOrdinal()
-            .domain(vis.data.map(d => d.ufo_shape))
+            .domain(vis.categoriesCombined.map(d => d.type))
             
-        vis.ufoShapeColorScale.range(d3.quantize(d3.interpolateRainbow, vis.ufoShapeColorScale.domain().length))
-        console.log(vis.yearColorScale.range())
+        vis.ufoShapeColorScale.range(d3.quantize(d3.interpolateWarm, vis.ufoShapeColorScale.domain().length))
+        //console.log(vis.yearColorScale.range())
         // Setup Keys
         // Year Key
         vis.yearsDomain = vis.yearColorScale.domain();
@@ -239,24 +275,11 @@ class LeafletMap {
             .attr("offset", (d, i) => (i / (vis.yearsDomain.length - 1)) * 100 + "%")
             .attr("stop-color", d => vis.yearColorScale(d));
 
-        vis.yearKeyG.append("rect")
-            .attr("x", 25)
-            .attr("y", 10)
-            .attr("width", vis.legendRectWidth)
-            .attr("height", vis.legendRectHeight)
-            .style("fill", "url(#yearGradient)");
+        vis.yearRect.style("fill", "url(#yearGradient)");
         
-        vis.yearKeyG.append('text')
-            .attr('x', 10)
-            .attr('y', 45)
-            .text(vis.yearsDomain[0])
+        vis.yearRectMin.text(vis.yearsDomain[0])
         
-        vis.yearKeyG.append('text')
-            .attr('x', vis.legendRectWidth + 10)
-            .attr('y', 45)
-            .text(vis.yearsDomain[vis.yearsDomain.length - 1])
-
-        vis.yearKeyContainer.style('display', 'none');
+        vis.yearRectMax.text(vis.yearsDomain[vis.yearsDomain.length - 1])
 
         // Month Key
         vis.monthGradientStops = vis.monthGradient.selectAll('stop')
@@ -265,29 +288,16 @@ class LeafletMap {
             .attr("offset", (d, i) => (i / (vis.monthsDomain.length - 1)) * 100 + "%")
             .attr("stop-color", d => vis.monthColorScale(d));
 
-        vis.monthKeyG.append("rect")
-            .attr("x", 25)
-            .attr("y", 10)
-            .attr("width", vis.legendRectWidth)
-            .attr("height", vis.legendRectHeight)
-            .style("fill", "url(#monthGradient)");
+        vis.monthRect.style("fill", "url(#monthGradient)");
         
-        vis.monthKeyG.append('text')
-            .attr('x', 10)
-            .attr('y', 45)
-            .text(vis.monthsDomain[0])
+        vis.monthRectMin.text(vis.monthsDomain[0])
         
-        vis.monthKeyG.append('text')
-            .attr('x', vis.legendRectWidth + 10)
-            .attr('y', 45)
-            .text(vis.monthsDomain[vis.monthsDomain.length - 1])
-
-        vis.monthKeyContainer.style('display', 'none');
+        vis.monethRectMax.text(vis.monthsDomain[vis.monthsDomain.length - 1])
 
         // Time Key
         vis.timeKeySvg.selectAll('.color-block')
             .data(vis.timeDomain)
-            .enter().append('rect')
+            .join('rect')
             .attr('class', 'color-block')
             .attr('x', (d, i) => (i % Math.floor(vis.keyWidth / vis.blockKeySize)) * vis.blockKeySize + 20) // Wrap to the next row if needed
             .attr('y', (d, i) => Math.floor(i / Math.floor(vis.keyWidth / vis.blockSize)) * vis.blockSize)
@@ -297,20 +307,18 @@ class LeafletMap {
 
         vis.timeKeySvg.selectAll('.color-label')
             .data(vis.timeDomain)
-            .enter().append('text')
+            .join('text')
             .attr('class', 'color-label')
             .attr('x', (d, i) => (i % Math.floor(vis.keyWidth / vis.blockKeySize)) * vis.blockKeySize + vis.blockSize / 2 + 20) // Wrap to the next row if needed
             .attr('y', (d, i) => Math.floor(i / Math.floor(vis.keyWidth / vis.blockSize)) * vis.blockSize + vis.blockSize + 10)
             .attr('dy', '0.35em')
             .style('text-anchor', 'middle')
             .text(d => d);
-        
-        vis.timeKeyContainer.style('display', 'none');
 
         // Shape Key
         vis.shapeKeySvg.selectAll('.color-block')
             .data(vis.shapeDomain)
-            .enter().append('rect')
+            .join('rect')
             .attr('class', 'color-block')
             .attr('x', (d, i) => (i % Math.floor(vis.keyWidth / vis.blockKeySize)) * vis.blockKeySize + 20) // Wrap to the next row if needed
             .attr('y', (d, i) => Math.floor(i / Math.floor(vis.keyWidth / vis.blockKeySize)) * vis.blockSize)
@@ -320,15 +328,13 @@ class LeafletMap {
 
         vis.shapeKeySvg.selectAll('.color-label')
             .data(vis.shapeDomain)
-            .enter().append('text')
+            .join('text')
             .attr('class', 'color-label')
             .attr('x', (d, i) => (i % Math.floor(vis.keyWidth / vis.blockKeySize)) * vis.blockKeySize + vis.blockSize / 2 + 20) // Wrap to the next row if needed
             .attr('y', (d, i) => Math.floor(i / Math.floor(vis.keyWidth / vis.blockKeySize)) * vis.blockSize + vis.blockSize + 10)
             .attr('dy', '0.35em')
             .style('text-anchor', 'middle')
             .text(d => d);
-        
-        vis.shapeKeyContainer.style('display', 'none');
     }
 
     UpdateForZoom() {
@@ -340,7 +346,7 @@ class LeafletMap {
         //want to control the size of the radius to be a certain number of meters? 
         vis.radiusSize = 3; 
 
-        console.log(vis.theMap)
+        //console.log(vis.theMap)
 
         // if( vis.theMap.getZoom > 15 ){
         //   metresPerPixel = 40075016.686 * Math.abs(Math.cos(map.getCenter().lat * Math.PI/180)) / Math.pow(2, map.getZoom()+8);
@@ -348,7 +354,7 @@ class LeafletMap {
         //   radiusSize = desiredMetersForPoint / metresPerPixel;
         // }
         
-        console.log('update')
+        //console.log('update')
         //redraw based on new zoom- need to recalculate on-screen position
         vis.Dots
             .attr("cx", d => vis.theMap.latLngToLayerPoint([d.latitude,d.longitude]).x)
@@ -356,13 +362,13 @@ class LeafletMap {
             .attr("r", vis.radiusSize) ;
     }
 
-    ChangeColorOption(colorOption) { //! Last 2 color scales are acting weird
+    ChangeColorOption(colorOption) {
         let vis = this;
         vis.colorOption = colorOption;
         vis.yearKeyContainer.style('display', 'none')
         vis.monthKeyContainer.style('display', 'none')
         vis.timeKeyContainer.style('display', 'none')
-        //vis.shapeKeyContainer.style('display', 'none')
+        vis.shapeKeyContainer.style('display', 'none')
         
         if (colorOption == 'Default'){
             vis.Dots.attr('fill', 'steelblue');
@@ -380,10 +386,65 @@ class LeafletMap {
             vis.timeKeyContainer.style('display', 'block')
         }
         else if (colorOption == 'UFO Shape') {
-            vis.Dots.attr('fill', d => vis.ufoShapeColorScale(d.ufo_shape))
-            //vis.shapeKeyContainer.style('display', 'block')
-            //! This key is too big, might cut
+            vis.Dots.attr('fill', d => {
+                let shape = vis.typesInOther.includes(d.ufo_shape) ? 'other' : d.ufo_shape;
+                return vis.ufoShapeColorScale(shape);
+            })
+            vis.shapeKeyContainer.style('display', 'block')
         }
+    }
+
+    CalculatePercentages(parameter, threshold) {
+        let counts = []
+        this.data.forEach((item, index) => {
+            if (item[parameter] != 'NA') {
+                const obj = counts.find(t =>t.type == item[parameter]);
+                if (obj) {
+                    obj.count += 1;
+                }
+                else {
+                    counts.push({
+                        type: item[parameter],
+                        count: 1
+                    })
+                }
+            }
+        })
+
+        let total = d3.sum(counts.map(d => d.count))
+        //console.log(counts);
+        counts.sort((a,b) => a.count - b.count);
+
+        let final = []
+        let ifOther = counts.find(t => t.type == 'other');
+        //console.log(ifOther)
+        final.push({
+            type: 'other',
+            count: ifOther == null ? 0 : ifOther.count,
+            percent: ifOther == null ? 0 : ifOther.count / total
+        })
+
+        this.typesInOther = []
+        
+        const other = final.find(t => t.type == 'other');
+        //console.log(other)
+        counts.filter(d => d.type != 'other').forEach(item => {
+            let temp = other.count + item.count;
+            let tempPerc = (temp / total) * 100;
+            let alonePerc = (item.count / total) * 100
+            if (tempPerc <= threshold) {
+                other.count = temp;
+                other.percent = tempPerc;
+                this.typesInOther.push(item.type)
+            }
+            else {
+                item.percent = alonePerc;
+                final.push(item)
+            }
+        })
+        //console.log(final)
+
+        return final.sort((a,b) => a.count - b.count);
     }
 
     GetCurrentColor(d) {
@@ -402,7 +463,8 @@ class LeafletMap {
             return vis.timeOfDayColorScale(d.timeOfDay)
         }
         else if (vis.colorOption == 'UFO Shape') {
-            return vis.ufoShapeColorScale(d.ufo_shape)
+            let shape = vis.typesInOther.includes(d.ufo_shape) ? 'other' : d.ufo_shape;
+            return vis.ufoShapeColorScale(shape)
         }
     }
 
