@@ -2,7 +2,7 @@ class LineGraph {
     constructor(_config, _dispatcher, _data) {
         this.config = {
             parentElement: _config.parentElement,
-            containerWidth: _config.containerWidth || '100%',
+            containerWidth: _config.containerWidth || 1150,
             containerHeight: _config.containerHeight || 250,
             margin: _config.margin || {top: 45, right: 25, bottom: 40, left: 50},
             tooltipPadding: _config.tooltipPadding || 15,
@@ -18,16 +18,8 @@ class LineGraph {
     InitVis() {
         let vis = this;
 
-        vis.parentElement = d3.select(vis.config.parentElement);
-
-        vis.parentWidth = parseFloat(vis.parentElement.style('width'));
-        vis.parentHeight = parseFloat(vis.parentElement.style('height'));
-
-        vis.containerWidth = vis.config.containerWidth === '100%' ? vis.parentWidth : parseFloat(vis.config.containerWidth);
-        vis.containerHeight = vis.config.containerHeight === '100%' ? vis.parentHeight : parseFloat(vis.config.containerHeight);
-
-        vis.width = vis.containerWidth - vis.config.margin.left - vis.config.margin.right;
-        vis.height = vis.containerHeight - vis.config.margin.top - vis.config.margin.bottom;
+        vis.width = vis.config.containerWidth - vis.config.margin.left - vis.config.margin.right;
+        vis.height = vis.config.containerHeight - vis.config.margin.top - vis.config.margin.bottom;
 
         //console.log(vis.height)
 
@@ -51,8 +43,8 @@ class LineGraph {
     
         // Define size of SVG drawing area
         vis.svg = d3.select(vis.config.parentElement).append('svg')
-            .attr('width', vis.containerWidth)
-            .attr('height', vis.containerHeight);
+            .attr('width', vis.config.containerWidth)
+            .attr('height', vis.config.containerHeight);
     
         // Append group element that will contain our actual chart (see margin convention)
         vis.chart = vis.svg.append('g')
