@@ -44,7 +44,8 @@ class WordCloud {
             "like", "look", "no", "out", "r", "as", "two", "that", "up", "we", "were", "shape", "one",
             "or", "s", "be", "by", "had", "not", "off", "seen", "sight", "but", "just", "this", "three",
             "when", "w", "into", "observe", "ufo", "while", "witness", "obj", "what", "amp", "around",
-            "format", "me", "across", "back", "go", "our"];
+            "format", "me", "across", "back", "go", "our", "there", "they", "us", "went", "away", "first",
+            "notice", "approx", "have", "other", "all", "than"];
 
         vis.config.margin = {top: 20, right: 20, bottom: 20, left: 20};
         vis.config.width = 600;
@@ -70,7 +71,7 @@ class WordCloud {
         console.log("word count", new_data.size)
         console.log("new_data", new_data);
 
-        const topWords = this.getTopWords(new_data, 40);
+        const topWords = this.getTopWords(new_data, 60);
         console.log("topWords", topWords);
 
 
@@ -80,21 +81,34 @@ class WordCloud {
             .attr("width", vis.config.width)
             .attr("height", vis.config.height)
             .append("g")
-            .attr("transform", `translate(${vis.config.margin.left},${vis.config.margin.top})`);
+            // .attr("transform", `translate(${vis.config.margin.left},${vis.config.margin.top})`);
+
+        vis.svg.append("rect")
+            .attr("x", 0)
+            .attr("y", 0)
+            .attr("width", vis.config.width)
+            .attr("height", vis.config.height)
+            .style("fill", "none")
+            .style("stroke", "black")
+            .style("stroke-width", 2);
 
         // Create scales
         vis.fontSizeScale = d3.scaleLinear()
             .domain([0, d3.max(Object.values(topWords))])
             .range([vis.config.minFontSize, vis.config.maxFontSize]);
 
-        // Create word elements
+        const colorScale = d3.scaleLinear()
+            .domain([3, d3.max(Object.values(topWords))])
+            .range(["blue", "red"]);
+
+        // Create words
         vis.words = vis.svg.selectAll("text")
             .data(Object.entries(topWords))
             .enter()
             .append("text")
             .text(d => d[0])
             .attr("font-size", d => vis.fontSizeScale(d[1]))
-            .attr("fill", vis.config.textColor)
+            .attr("fill", d => colorScale(d[1]))
             .attr("x", d => Math.random() * vis.config.width)
             .attr("y", d => Math.random() * vis.config.height)
 
@@ -138,8 +152,8 @@ class WordCloud {
             wordPositions.push({ x, y, fontSize });
 
             // Set the position of the word element
-            wordElement.attr("x", x)
-                    .attr("y", y);
+            wordElement.attr("x", x + 10)
+                    .attr("y", y + 30);
 
             // Adjust positions to ensure words remain within the SVG container boundaries
             // wordRect.x = Math.max(minX, Math.min(wordRect.x, maxX));
@@ -188,6 +202,9 @@ class WordCloud {
         if (word == "abserv") {
             return "observe";
         }
+        if (word == "acelarate") {
+            return "accelerate";
+        }
         return word;
     }
 
@@ -222,6 +239,21 @@ class WordCloud {
         }
         if (word.includes("slow")) {
             return "slow";
+        }
+        if (word.includes("accel")) {
+            return "accelerate";
+        }
+        if (word.includes("airc")) {
+            return "aircraft";
+        }
+        if (word.includes("flew")) {
+            return "fly";
+        }
+        if (word.includes("notic")) {
+            return "notice";
+        }
+        if (word.includes("chang")) {
+            return "change";
         }
         if (word.endsWith("ing")) {
             return word.slice(0, -3);
