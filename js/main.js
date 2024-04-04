@@ -73,12 +73,14 @@ d3.csv('data/ufo_sightings.csv')
         title: 'Sightings by Hour',
         xTitle: 'Hour'
     }, dispatcher, sightings);
+    barchart.UpdateVis();
 
     barchart2 = new BarChart2({
         parentElement: '#barchart2',
         title: 'Sightings by Month',
         xTitle: 'Month'
     }, dispatcher, sightings);
+    barchart2.UpdateVis();
 
     // Dummy data
     const dummyData = {
@@ -140,6 +142,13 @@ dispatcher.on('filterFromTimeLine', (monthsSelected) => {
     // Update histogram
     histogram.data = filteredData;
     histogram.UpdateVis();
+
+    
+    barchart2.data = filteredData;
+    barchart2.UpdateVis();
+    
+    barchart.data = filteredData;
+    barchart.UpdateVis();
 })
 
 dispatcher.on('filterFromUFOShapePie', (shapes) => {
@@ -160,6 +169,12 @@ dispatcher.on('filterFromUFOShapePie', (shapes) => {
     // Update histogram
     histogram.data = filteredData;
     histogram.UpdateVis();
+    
+    barchart2.data = filteredData;
+    barchart2.UpdateVis();
+    
+    barchart.data = filteredData;
+    barchart.UpdateVis();
 })
 
 dispatcher.on('filterFromBar2', (monthsSelected) => {
@@ -174,6 +189,20 @@ dispatcher.on('filterFromBar2', (monthsSelected) => {
     // Update Leaflet Map
     map.data = filteredData;
     map.UpdateVis();
+
+    // Update Timeline
+    timeline.data = filteredData;
+    timeline.UpdateVis();
+
+    // Update histogram
+    histogram.data = filteredData;
+    histogram.UpdateVis();
+
+    barchart.data = filteredData;
+    barchart.UpdateVis();
+
+    ufoShape.data = filteredData;
+    ufoShape.UpdateVis();
 })
 
 dispatcher.on('filterFromHistogram', (selectedRange) => {
@@ -192,15 +221,36 @@ dispatcher.on('filterFromHistogram', (selectedRange) => {
     // Update Leaflet Map with filtered data
     map.data = filteredData;
     map.UpdateVis();
+    
+    barchart2.data = filteredData;
+    barchart2.UpdateVis();
+    
+    barchart.data = filteredData;
+    barchart.UpdateVis();
 });
 
 dispatcher.on('filterFromBar', (hoursSelected) => {
     let cleaned_data = []
+    console.log(hoursSelected)
     const filteredData = filterDataByHour(sightings, hoursSelected);
 
     // Update Leaflet Map
     map.data = filteredData;
     map.UpdateVis();
+
+    // Update Timeline
+    timeline.data = filteredData;
+    timeline.UpdateVis();
+
+    // Update histogram
+    histogram.data = filteredData;
+    histogram.UpdateVis();
+
+    barchart2.data = filteredData;
+    barchart2.UpdateVis();
+
+    ufoShape.data = filteredData;
+    ufoShape.UpdateVis();
 })
 
 dispatcher.on('cloudFilter', (wordsSelected) => {
@@ -235,12 +285,12 @@ function filterDataByHour(data, hourNumbers) {
 
     const filteredData = data.filter(d => {
 
-        const hour = d.date_time.getHours();
+        // const hour = d.date_time.getHours();
         // console.log('month', month)
         // Check if the month matches any of the selected month numbers
         // console.log(monthNumbers.includes(month));
         // console.log("month 2", formattedMonthNumbers);
-        return hourNumbers.includes(hour);
+        return hourNumbers.includes(d.hourOfDay);
     });
     // console.log('filteredData', filteredData)
     return filteredData;
@@ -262,12 +312,12 @@ function filterDataByMonth(data, monthNumbers) {
     // console.log(data)
     const filteredData = data.filter(d => {
 
-        const month = d.date_time.getMonth() + 1;
+        // const month = d.date_time.getMonth() + 1;
         // console.log('month', month)
         // Check if the month matches any of the selected month numbers
         // console.log(monthNumbers.includes(month));
         // console.log("month 2", formattedMonthNumbers);
-        return monthNumbers.includes(month);
+        return monthNumbers.includes(d.month);
     });
     // console.log('filteredData', filteredData)
     return filteredData;
@@ -313,9 +363,16 @@ function ResetVisualizations(elementName) {
     if (elementName != '#histogram'){
         histogram.data = sightingsOriginal;
         histogram.UpdateVis();
+    }
 
-        map.data = sightingsOriginal;
-        map.UpdateVis();
+    if (elementName != '#barchart'){
+        barchart.data = sightingsOriginal;
+        barchart.UpdateVis();
+    }
+
+    if (elementName != '#barchart2'){
+        barchart2.data = sightingsOriginal;
+        barchart2.UpdateVis();
     }
 }
 
