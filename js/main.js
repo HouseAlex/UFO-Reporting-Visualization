@@ -258,6 +258,25 @@ dispatcher.on('cloudFilter', (wordsSelected) => {
     map.data = filteredData;
     // console.log(filteredData);
     map.UpdateVis();
+
+    
+
+    // Update Timeline
+    timeline.data = filteredData;
+    timeline.UpdateVis();
+
+    // Update histogram
+    histogram.data = filteredData;
+    histogram.UpdateVis();
+
+    barchart.data = filteredData;
+    barchart.UpdateVis();
+
+    barchart2.data = filteredData;
+    barchart2.UpdateVis();
+
+    ufoShape.data = filteredData;
+    ufoShape.UpdateVis();
 })
 
 dispatcher.on('reset', (elementName) => {
