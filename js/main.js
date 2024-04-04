@@ -3,7 +3,7 @@ let map, ufoShape, timeline, colorBySelector, mapSelector, sightingsOriginal
 let colorByOptions = ['Default', 'Year', 'Month', 'Time of Day', 'UFO Shape']
 let sightings = [];
 
-const dispatcher = d3.dispatch('filterFromTimeLine', 'filterFromUFOShapePie', 'filterFromBar', 'filterFromBar2', 'filterFromHistogram', 'reset');
+const dispatcher = d3.dispatch('filterFromTimeLine', 'filterFromUFOShapePie', 'filterFromBar', 'filterFromBar2', 'filterFromHistogram', 'cloudFilter', 'reset');
 
 const parseTime = d3.timeParse("%m/%d/%Y");
 
@@ -73,10 +73,18 @@ d3.csv('data/ufo_sightings.csv')
         parentElement: '#barchart2',
     }, dispatcher, sightings);
 
+    // Dummy data
+    const dummyData = {
+        "Lorem": 10,
+        "ipsum": 20,
+        "dolor": 15,
+        "sit": 25,
+        "amet": 30
+    };
+
     wordcloud = new WordCloud({
         parentElement: '#wordcloud',
-    }, sightings);
-    wordcloud.UpdateVis();
+    }, dispatcher, sightings);
 
     
     map.UpdateVis();
@@ -174,22 +182,19 @@ dispatcher.on('filterFromHistogram', (selectedRange) => {
     map.UpdateVis();
 });
 
-dispatcher.on('reset', (elementName) => {
-    console.log(elementName)
-    ResetVisualizations(elementName);
-})
-
 dispatcher.on('filterFromBar', (hoursSelected) => {
     let cleaned_data = []
-    // console.log('Sightings 2', sightings);
-    // Break apart date time
-    // console.log(monthsSelected);
     const filteredData = filterDataByHour(sightings, hoursSelected);
-
-    // console.log(filteredData);
 
     // Update Leaflet Map
     map.data = filteredData;
+    map.UpdateVis();
+})
+
+dispatcher.on('cloudFilter', (wordsSelected) => {
+    const filteredData = filterDataByWord(sightings, wordsSelected);
+    map.data = filteredData;
+    // console.log(filteredData);
     map.UpdateVis();
 })
 
@@ -198,6 +203,17 @@ dispatcher.on('reset', (elementName) => {
     ResetVisualizations(elementName);
 })
 
+function filterDataByWord(data, wordsSelected) {
+    // console.log(wordsSelected);
+    const filteredData = data.filter(d => {
+        const words = d.description.split(' ');
+        // console.log(words);
+        return words.some(word => wordsSelected.includes(word));
+    });
+    // console.log('filteredData', filteredData);
+    return filteredData;
+}
+
 function filterDataByHour(data, hourNumbers) {
     // console.log("Hours", hourNumbers);
     if (!Array.isArray(hourNumbers)) {
@@ -205,13 +221,6 @@ function filterDataByHour(data, hourNumbers) {
         return [];
     }
 
-    // console.log("Pre-format", monthNumbers);
-    // Convert month numbers to strings with leading zeros for comparison
-    // const formattedHourNumbers = hourNumbers.map(hour => hour.toString().padStart(2, '0'));
-    // console.log("Month nums", formattedMonthNumbers);
-
-    // Filter data based on the month numbers
-    // console.log(data)
     const filteredData = data.filter(d => {
 
         const hour = d.date_time.getHours();
