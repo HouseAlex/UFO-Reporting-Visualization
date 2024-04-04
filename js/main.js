@@ -126,10 +126,10 @@ d3.csv('data/ufo_sightings.csv')
 .catch(error => console.error(error));
 
 dispatcher.on('filterFromTimeLine', (monthsSelected) => {
-    console.log(monthsSelected);
+    //console.log(monthsSelected);
     const filteredData = timeline.data.filter(d => monthsSelected[0] < d.dateOccurred && d.dateOccurred < monthsSelected[1]);
 
-    console.log(filteredData);
+    //console.log(filteredData);
 
     // Update Leaflet Map
     map.data = filteredData;
@@ -231,7 +231,7 @@ dispatcher.on('filterFromHistogram', (selectedRange) => {
 
 dispatcher.on('filterFromBar', (hoursSelected) => {
     let cleaned_data = []
-    console.log(hoursSelected)
+    //console.log(hoursSelected)
     const filteredData = filterDataByHour(sightings, hoursSelected);
 
     // Update Leaflet Map
@@ -259,8 +259,6 @@ dispatcher.on('cloudFilter', (wordsSelected) => {
     // console.log(filteredData);
     map.UpdateVis();
 
-    
-
     // Update Timeline
     timeline.data = filteredData;
     timeline.UpdateVis();
@@ -280,7 +278,7 @@ dispatcher.on('cloudFilter', (wordsSelected) => {
 })
 
 dispatcher.on('reset', (elementName) => {
-    console.log(elementName)
+    //console.log(elementName)
     ResetVisualizations(elementName);
 })
 
@@ -359,7 +357,7 @@ function CalculateTimeOfDay(hour) {
 }
 
 function ResetVisualizations(elementName) {
-    console.log('resetting!')
+    //console.log('resetting!')
     // Reset Leaflet Map
     if (elementName != '#map'){
         map.data = sightingsOriginal;

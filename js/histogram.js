@@ -112,15 +112,15 @@ class Histogram {
         // cutoff is being used here in order to stop the outliers that are too large from ruining the histogram
         let cutoff = 8000; // Define a reasonable cutoff
         mappedData = mappedData.map(d => (d > cutoff ? cutoff : d));
-        console.log(mappedData);
+        //console.log(mappedData);
 
         vis.xScale.domain(d3.extent(mappedData))
-        console.log(d3.extent(mappedData));
+        //console.log(d3.extent(mappedData));
 
         // Histogram Bins
         vis.bins = d3.histogram().domain(vis.xScale.domain()).thresholds(vis.xScale.ticks(20))(mappedData);
 
-        console.log("Histogram bins:", vis.bins);
+        //console.log("Histogram bins:", vis.bins);
 
         vis.yScale.domain([0, d3.max(vis.bins.map(d => d.length))])
 

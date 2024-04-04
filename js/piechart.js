@@ -158,7 +158,7 @@ class PieChart {
         if (selectedArcs.includes('other')){
             selectedArcs = selectedArcs.concat(vis.typesInOther);
         }
-        console.log(selectedArcs)
+        //console.log(selectedArcs)
 
         if (selectedArcs.length > 0) {
             vis.dispatcher.call('filterFromUFOShapePie', vis.event, selectedArcs);
@@ -232,7 +232,7 @@ class PieChart {
                 final.push(item)
             }
         })
-        console.log(final)
+        //console.log(final)
 
         final.forEach(d => {
             d.percentFormated = this.FormatPercent(d.percent);

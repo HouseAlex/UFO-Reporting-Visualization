@@ -94,7 +94,7 @@ class BarChart {
         vis.data.forEach(function(d) {
             d.dateString = d3.timeParse("%m/%d/%Y %H:%M")(d.date_time);
         });
-        console.log(vis.data)
+        //console.log(vis.data)
 
         vis.dataAgg = d3.rollup(vis.data,
             v => v.length,

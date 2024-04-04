@@ -183,16 +183,16 @@ class LeafletMap {
         vis.yearColorScale.domain(d3.extent(vis.data, d => d.year));
         vis.monthColorScale.domain(d3.extent(vis.data, d => d.month));
         vis.timeOfDayColorScale.domain(vis.data.map(d => d.timeOfDay));
-        console.log(vis.data.map(d => d.timeOfDay).filter(vis.onlyUnique))
+        //console.log(vis.data.map(d => d.timeOfDay).filter(vis.onlyUnique))
 
         vis.categoriesCombined = vis.CalculatePercentages('ufo_shape', 30)
-        console.log(vis.categoriesCombined)
+        //console.log(vis.categoriesCombined)
 
         vis.ufoShapeColorScale = d3.scaleOrdinal()
             .domain(vis.categoriesCombined.map(d => d.type))
             
         vis.ufoShapeColorScale.range(d3.quantize(d3.interpolateWarm, vis.ufoShapeColorScale.domain().length))
-        console.log(vis.yearColorScale.range())
+        //console.log(vis.yearColorScale.range())
         // Setup Keys
         // Year Key
         vis.yearsDomain = vis.yearColorScale.domain();
@@ -346,7 +346,7 @@ class LeafletMap {
         //want to control the size of the radius to be a certain number of meters? 
         vis.radiusSize = 3; 
 
-        console.log(vis.theMap)
+        //console.log(vis.theMap)
 
         // if( vis.theMap.getZoom > 15 ){
         //   metresPerPixel = 40075016.686 * Math.abs(Math.cos(map.getCenter().lat * Math.PI/180)) / Math.pow(2, map.getZoom()+8);
@@ -354,7 +354,7 @@ class LeafletMap {
         //   radiusSize = desiredMetersForPoint / metresPerPixel;
         // }
         
-        console.log('update')
+        //console.log('update')
         //redraw based on new zoom- need to recalculate on-screen position
         vis.Dots
             .attr("cx", d => vis.theMap.latLngToLayerPoint([d.latitude,d.longitude]).x)

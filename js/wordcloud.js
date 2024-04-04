@@ -67,11 +67,11 @@ class WordCloud {
 
         const new_data = this.manipulateData(vis.data, stopWords);
         // console.log("data", vis.data);
-        console.log("word count", new_data.size)
-        console.log("new_data", new_data);
+        //console.log("word count", new_data.size)
+        //console.log("new_data", new_data);
 
         const topWords = this.getTopWords(new_data, 40);
-        console.log("topWords", topWords);
+        //console.log("topWords", topWords);
 
 
         // Set up SVG container
