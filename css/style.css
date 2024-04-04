@@ -79,6 +79,7 @@
 
 .screen {
     display: grid;
+    grid-template-rows: 3% 70% 27%;
 }
 
 .map-container {
