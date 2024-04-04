@@ -177,7 +177,7 @@ class LeafletMap {
     UpdateVis() {
         let vis = this;
 
-        console.log(vis.data)
+        //console.log(vis.data)
 
         // Define color scale domains based on data.
         vis.yearColorScale.domain(d3.extent(vis.data, d => d.year));
@@ -442,7 +442,7 @@ class LeafletMap {
                 final.push(item)
             }
         })
-        console.log(final)
+        //console.log(final)
 
         return final.sort((a,b) => a.count - b.count);
     }
