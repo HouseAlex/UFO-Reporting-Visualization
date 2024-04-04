@@ -70,10 +70,14 @@ d3.csv('data/ufo_sightings.csv')
 
     barchart = new BarChart({
         parentElement: '#barchart',
+        title: 'Sightings by Hour',
+        xTitle: 'Hour'
     }, dispatcher, sightings);
 
     barchart2 = new BarChart2({
         parentElement: '#barchart2',
+        title: 'Sightings by Month',
+        xTitle: 'Month'
     }, dispatcher, sightings);
     // barchart.UpdateVis();
 

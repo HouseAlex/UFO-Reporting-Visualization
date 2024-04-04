@@ -2,6 +2,8 @@ class BarChart {
     constructor(_config, _dispatcher, _data) {
         this.config = {
             parentElement: _config.parentElement,
+            title: _config.title,
+            xTitle: _config.xTitle
         }
         this.data = _data;
         this.dispatcher = dispatcher;
